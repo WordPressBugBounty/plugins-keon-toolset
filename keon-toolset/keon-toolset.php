@@ -5,7 +5,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 Plugin Name: Keon Toolset
 Plugin URI:  
 Description: A easy plugin to import dummy data for themes by Keon Themes.
-Version:     1.8.9
+Version:     1.9.0
 Author:      Keon Themes
 Author URI:  https://keonthemes.com
 License:     GPLv3 or later
@@ -62,7 +62,7 @@ add_filter( 'admin_enqueue_scripts', array( $plugin_admin, 'enqueue_scripts' ), 
 add_action( 'advanced_import_replace_term_ids', array( $plugin_admin, 'replace_term_ids' ), 20 );
 add_action( 'advanced_import_replace_post_ids', array( $plugin_admin, 'replace_attachment_ids' ), 30 );
 
-if( ( keon_toolset_theme_check( 'shoppable' ) && !keon_toolset_theme_check( 'hello-shoppable' ) ) || ( keon_toolset_theme_check( 'bosa-media-marketing' ) || keon_toolset_theme_check( 'bosa-business-firm' ) || keon_toolset_theme_check( 'bosa-photograph' ) ) ){
+if( ( keon_toolset_theme_check( 'shoppable' ) && !keon_toolset_theme_check( 'hello-shoppable' ) ) || ( keon_toolset_theme_check( 'bosa-media-marketing' ) || keon_toolset_theme_check( 'bosa-business-firm' ) || keon_toolset_theme_check( 'bosa-photograph' ) || keon_toolset_theme_check( 'bosa-interior-design' ) ) ){
     require KEON_TOOLSET_PATH . 'demo/base-install/base-install.php';
     add_action('advanced_import_after_complete_screen', array( $plugin_admin, 'kt_advance_import' ));
     add_action('advanced_import_after_content_screen', array( $plugin_admin, 'kt_advance_import_transient' )); 
