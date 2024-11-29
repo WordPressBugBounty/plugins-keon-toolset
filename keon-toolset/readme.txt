@@ -2,9 +2,9 @@
 Contributors: keonthemes, kanchha-kaji-prajapati
 Tags: demo data, one click demo import, demo data importer
 Requires at least: 4.6
-Tested up to: 6.6
+Tested up to: 6.7
 Requires PHP: 4.6
-Stable tag: 1.9.3
+Stable tag: 1.9.4
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -39,6 +39,9 @@ https://pxhere.com/en/license [CCO License]
 Keon Toolset
 
 == Changelog ==
+
+= 1.9.4 =
+* Theme compatibility updated.
 
 = 1.9.3 =
 * Theme compatibility updated.
