@@ -1,15 +1,15 @@
 .keon-notice {
-  display: -webkit-flex;
-  display: -moz-flex;
-  display: -ms-flex;
-  display: -o-flex;
-  display: flex;
-  align-items: center;
-  -webkit-flex-wrap: wrap; 
-  -moz-flex-wrap: wrap; 
-  -ms-flex-wrap: wrap; 
-  -o-flex-wrap: wrap; 
-  flex-wrap: wrap; 
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flex;
+    display: -o-flex;
+    display: flex;
+    align-items: center;
+    -webkit-flex-wrap: wrap;
+    -moz-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    -o-flex-wrap: wrap;
+    flex-wrap: wrap;
 }
 
 .keon-notice {
@@ -72,7 +72,7 @@
     margin-right: 10px;
 }
 
-@media screen and (max-width: 991px){
+@media screen and (max-width: 991px) {
     .admin-notice-dismiss {
         position: static;
         display: block;
@@ -81,7 +81,7 @@
 }
 
 @media only screen and (min-width: 768px) {
-    .keon-notice.updated.notice  {
+    .keon-notice.updated.notice {
         padding-left: 20px;
     }
     .keon-notice .getting-img {
@@ -98,5 +98,146 @@
     }
     .getting-content h3 {
         font-size: 14px;
+    }
+}
+
+
+.bosa-go-pro-notice {
+    background-color: #f6f6f6;
+    margin: 40px 20px 0 0;
+    position: relative;
+    padding: 20px 38px 20px 20px;
+    border: 1px solid #c3c4c7;
+    border-width: 1px 1px 1px 4px;
+    border-style: solid;
+    border-color: #c3c4c7;
+    border-left-color: #F66C5E;
+    gap: 40px;
+    display: flex;
+    align-items: center;
+    /*    flex-wrap: wrap;*/
+}
+.bosa-go-pro-notice .getting-img {
+    flex-basis: 300px;
+    border-radius: 10px;
+    overflow: hidden;
+    line-height: 1;
+}
+.bosa-go-pro-notice .getting-img img {
+    max-width: 100%;
+    width: auto;
+    height: auto;
+}
+.bosa-go-pro-notice .getting-content {
+    flex: 2.5;
+    padding: 0;
+    width: 100%;
+}
+.bosa-go-pro-notice .bosa-notice-title {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin: 0;
+    margin-bottom: 18px;
+}
+.bosa-go-pro-notice .bosa-title {
+    color: #F66C5E;
+    font-size: 1.1em;
+    text-decoration: none;
+}
+.bosa-go-pro-notice .bosa-title:hover {
+    color: #CE4334;
+}
+.bosa-go-pro-notice .bosa-demo-info-list {
+    list-style: none;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+.bosa-go-pro-notice .bosa-demo-info-list li {
+    margin: 0;
+    padding: 0;
+    margin-bottom: 6px;
+    font-size: 13px;
+    line-height: 1.4em;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    gap: 10px;
+    text-align: left;
+}
+.tick-symbol:before,
+.bosa-go-pro-notice ul.bosa-demo-info-list li:before {
+    content: "\2714";
+    font-weight: 700;
+    font-size: inherit;
+    color: #d7877f;
+}
+.bosa-go-pro-notice .button-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.bosa-go-pro-notice .button-wrapper .btn-primary {
+    text-decoration: none;
+    background-color: #F66C5E;
+    color: #FFFFFF;
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 12px 24px;
+    line-height: 1.1;
+    border-radius: 6px;
+    -webkit-transition: background-color 0.4s;
+    -ms-transition: background-color 0.4s;
+    transition: background-color 0.4s;
+}
+.bosa-go-pro-notice .button-wrapper .btn-primary.btn-theme-detail {
+    background: #a3a3a3;
+}
+.bosa-go-pro-notice .button-wrapper .btn-primary:hover {
+    background-color: #CE4334;
+    color: #FFFFFF;
+}
+.bosa-go-pro-notice .button-wrapper .keon-remind-me-later {
+    background-color: transparent;
+    border: none;
+    color: #d7d7d7;
+    padding: 0;
+    cursor: pointer;
+}
+.bosa-go-pro-notice .button-wrapper .keon-remind-me-later:hover {
+    background-color: transparent;
+    color: #CE4334;
+}
+.bosa-go-pro-notice .admin-notice-dismiss {
+    right: 0px;
+}
+
+@media only screen and (min-width: 1400px) {
+    .bosa-go-pro-notice .getting-img {
+        flex-basis: 350px;
+    }
+    .bosa-go-pro-notice .bosa-notice-title {
+        font-size: 26px;
+    }
+    .bosa-go-pro-notice .bosa-demo-info-list li {
+        font-size: 14px;
+        margin-bottom: 8px
+    }
+    .bosa-go-pro-notice .button-wrapper .btn-primary {
+        font-size: 14px
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .bosa-go-pro-notice {
+        flex-direction: column;
+    }
+    .bosa-go-pro-notice .getting-img {
+        flex-basis: auto;
+    }
+    .bosa-go-pro-notice .button-wrapper {
+        justify-content: center;
     }
 }

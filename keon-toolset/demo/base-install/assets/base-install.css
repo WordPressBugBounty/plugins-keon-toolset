@@ -23,27 +23,93 @@
 .base-install-notice-inner {
     background-color: #FFFFFF;
     box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.5);
-    width: 630px;
-    padding: 50px;
+    width: 100%;
+    max-width: 1050px;
+    padding: 50px 0 0;
     text-align: center;
     border-radius: 6px;
-    min-height: 400px;
 }
 .base-install-content {
     font-size: 15px;
     margin-bottom: 25px;
 }
+.base-install-notice-inner .base-install-prompt {
+    max-width: 550px;
+}
 .base-install-content .base-install-title {
-    margin: 0 0 1em;
+    margin: 0 0 20px;
     color: #595959;
-    font-size: 1.875em;
+    font-size: 34px;
     font-weight: 600;
+    line-height: 1;
 }
 .base-install-content p {
     color: #545454;
     font-size: 1.125em;
     font-weight: 300;
-    margin-bottom: 2em;
+    margin-bottom: 25px;
+    margin-top: 0;
+}
+.base-install-notice-inner .base-go-pro-bosa-prompt {
+    margin-top: 40px;
+    background-color: #f2f2f2;
+    display: grid;
+    color: #454545;
+    grid-template-columns: auto 122px;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 20px;
+    gap: 40px;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+}
+@media only screen and (max-width: 768px) {
+    .base-install-notice-inner .base-go-pro-bosa-prompt {
+        grid-template-columns: auto;
+        text-align: center;
+    }
+}
+.base-install-notice-inner .base-go-pro-bosa-prompt .bosa-notice-title {
+    font-size: 22px;
+    font-weight: 500;
+    color: #595959;
+    line-height: 1.4;
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+.base-install-notice-inner .base-go-pro-bosa-prompt p {
+    margin: 0;
+    font-size: 15px;
+}
+.base-install-notice-inner .base-go-pro-bosa-prompt .bosa-title {
+    color: #F66C5E;
+    font-size: 1.1em;
+    font-weight: 500;
+    text-decoration: none;
+}
+.base-install-notice-inner .base-go-pro-bosa-prompt .bosa-title:hover {
+    background-color: transparent;
+    color: #CE4334;
+}
+.base-install-notice-inner .base-go-pro-bosa-prompt .btn-primary {
+    text-decoration: none;
+    border-radius: 30px;
+    background-color: #F66C5E;
+    color: #FFFFFF;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 12px 20px;
+    margin: 0px;
+    text-align: center;
+    line-height: 1.4;
+    -webkit-transition: background-color 0.4s;
+    -ms-transition: background-color 0.4s;
+    transition: background-color 0.4s;
+}
+.base-install-notice-inner .base-go-pro-bosa-prompt .btn-primary:hover {
+    background-color: #CE4334;
 }
 .swal2-content ol li,
 .swal2-content ol label {
@@ -52,35 +118,35 @@
 .swal2-content ol #installBase {
     margin-top: 3px;
 }
-.base-install-notice-inner .base-install-success{
+.base-install-notice-inner .base-install-success {
     display: none;
 }
 .base-install-btn .button {
-    background-color: #3085d6;
+    background-color: #5530af;
     border: 0;
-    border-radius: .25em;
+    border-radius: 30px;
     color: #fff;
     font-size: 1.0625em;
-    margin: .3125em;
+    margin: 0;
     padding: .625em 2em;
     box-shadow: none;
     font-weight: 500;
     line-height: 1.4em;
 }
 .base-install-btn .close-base-button {
-    background-color: rgb(221, 51, 51);
+    color: #b1b1b1;
+    text-decoration: underline;
+    font-size: 13px;
+    margin-top: 10px;
+    display: inline-block;
 }
-
+.base-install-btn .button:hover {
+    background: #C72E2E;
+    color: #ffffff;
+}
 .base-install-btn .close-base-button:hover {
-    background-color: #C72E2E;
-    color: #fff;
+    color: #C72E2E;
 }
-@media screen and (min-width: 992px) {
-  .base-install-notice-inner {
-    padding: 50px 200px;
-  }
-}
-
 @keyframes base-show {
     0% {
         -webkit-transform: scale(.7);

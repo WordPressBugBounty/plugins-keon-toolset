@@ -51,11 +51,19 @@ class Kt_Base_Install_Hooks {
                     '<div class="base-install-notice-outer">
                         <div class="base-install-notice-inner">
                             <div class="base-install-prompt" >
-                                <div class="base-install-content"><h2 class="base-install-title">%1$s</h2><p>We recommend to %2$s %1$s theme as all our demo works perfectly with this theme. You can still try our demo on any block theme but it might not look as you see on our demo.</p></div>
+                                <div class="base-install-content"><h2 class="base-install-title">%1$s</h2><p>We recommend to %2$s %1$s theme as all our demo works perfectly with this theme. You can still try our demo on any bosa theme but it might not look as you see on our demo.</p></div>
                                 <div class="base-install-btn">
                                     <a class= "install-base-theme button button-primary">%2$s %1$s</a>
-                                    <a class= "close-base-notice button close-base-button">Skip</a>
+                                    <br>
+                                    <a class= "close-base-notice close-base-button">Skip</a>
                                 </div>
+                            </div>
+                            <div class="base-go-pro-bosa-prompt">
+                                <div class="go-pro-description">
+                                <h2 class="bosa-notice-title"> Upgrade to <a href="https://bosathemes.com/pricing" target="_blank" class="bosa-title">Bosa Pro</a></h2>
+                                <P>Unlock pro features, enhanced functionalities, customizable options & 100+ Starter sites.</p>
+                                </div>
+                                <a href="https://bosathemes.com/bosa-pro/#pricing" class="btn-primary" target="_blank">Buy Now</a>
                             </div>
                             <div class="base-install-success">
                                 <div class="base-install-content"><h3>Thank you for installing %1$s. Click on Next to proceed to demo importer.</h3></div>

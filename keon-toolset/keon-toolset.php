@@ -5,7 +5,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 Plugin Name: Keon Toolset
 Plugin URI:  
 Description: A easy plugin to import dummy data for themes by Keon Themes.
-Version:     2.0.5
+Version:     2.0.6
 Author:      Keon Themes
 Author URI:  https://keonthemes.com
 License:     GPLv3 or later
@@ -16,6 +16,7 @@ Text Domain: keon-toolset
 define( 'KEON_TOOLSET_URL', plugin_dir_url( __FILE__ ).'demo/' );
 define( 'KEON_TEMPLATE_URL', plugin_dir_url( __FILE__ ) );
 define( 'KEON_TOOLSET_PATH', plugin_dir_path( __FILE__ ) );
+define( 'KEON_TOOLSET_VERSION', '2.0.6');
 
 /**
  * Returns the currently active theme's name.
@@ -46,6 +47,9 @@ require KEON_TOOLSET_PATH . 'demo/functions.php';
 require KEON_TOOLSET_PATH . 'includes/class-template-library-base.php';
 require KEON_TOOLSET_PATH . 'includes/theme-check-functions.php';
 require KEON_TOOLSET_PATH . 'includes/admin-notices.php';
+if ( keon_toolset_theme_check( 'bosa' ) && !keon_toolset_theme_check( 'bosa-pro' ) ){
+    require KEON_TOOLSET_PATH . 'includes/class-bosa-pro-upgrade-notice.php';
+}
 
 /**
  * Register all of the hooks related to the admin area functionality
@@ -62,7 +66,7 @@ add_filter( 'admin_enqueue_scripts', array( $plugin_admin, 'enqueue_scripts' ), 
 add_action( 'advanced_import_replace_term_ids', array( $plugin_admin, 'replace_term_ids' ), 20 );
 add_action( 'advanced_import_replace_post_ids', array( $plugin_admin, 'replace_attachment_ids' ), 30 );
 
-if( ( keon_toolset_theme_check( 'shoppable' ) && !keon_toolset_theme_check( 'hello-shoppable' ) ) || ( keon_toolset_theme_check( 'bosa-media-marketing' ) || keon_toolset_theme_check( 'bosa-business-firm' ) || keon_toolset_theme_check( 'bosa-photograph' ) || keon_toolset_theme_check( 'bosa-interior-design' ) || keon_toolset_theme_check( 'bosa-cleaning-service' ) || keon_toolset_theme_check( 'bosa-veterinary' ) || keon_toolset_theme_check( 'bosa-yoga' ) || keon_toolset_theme_check( 'bosa-logistics' ) || keon_toolset_theme_check( 'bosa-crypto' ) || keon_toolset_theme_check( 'bosa-clinic' ) || keon_toolset_theme_check( 'bosa-it-services' ) || keon_toolset_theme_check( 'bosa-university' ) || keon_toolset_theme_check( 'bosa-creative-agency' ) || keon_toolset_theme_check( 'bosa-garden-care' ) || keon_toolset_theme_check( 'bosa-construction-company' ) || keon_toolset_theme_check( 'bosa-travel-agency' ) || keon_toolset_theme_check( 'bosa-business-agency' ) || keon_toolset_theme_check( 'bosa-online-marketing' ) ) ){
+if( ( keon_toolset_theme_check( 'shoppable' ) && !keon_toolset_theme_check( 'hello-shoppable' ) ) || ( keon_toolset_theme_check( 'bosa-media-marketing' ) || keon_toolset_theme_check( 'bosa-business-firm' ) || keon_toolset_theme_check( 'bosa-photograph' ) || keon_toolset_theme_check( 'bosa-interior-design' ) || keon_toolset_theme_check( 'bosa-cleaning-service' ) || keon_toolset_theme_check( 'bosa-veterinary' ) || keon_toolset_theme_check( 'bosa-yoga' ) || keon_toolset_theme_check( 'bosa-logistics' ) || keon_toolset_theme_check( 'bosa-crypto' ) || keon_toolset_theme_check( 'bosa-clinic' ) || keon_toolset_theme_check( 'bosa-it-services' ) || keon_toolset_theme_check( 'bosa-university' ) || keon_toolset_theme_check( 'bosa-creative-agency' ) || keon_toolset_theme_check( 'bosa-garden-care' ) || keon_toolset_theme_check( 'bosa-construction-company' ) || keon_toolset_theme_check( 'bosa-travel-agency' ) || keon_toolset_theme_check( 'bosa-business-agency' ) || keon_toolset_theme_check( 'bosa-online-marketing' ) || keon_toolset_theme_check( 'bosa-law-firm' ) ) ){
     require KEON_TOOLSET_PATH . 'demo/base-install/base-install.php';
     add_action('advanced_import_after_complete_screen', array( $plugin_admin, 'kt_advance_import' ));
     add_action('advanced_import_after_content_screen', array( $plugin_admin, 'kt_advance_import_transient' )); 
