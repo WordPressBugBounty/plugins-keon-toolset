@@ -5,7 +5,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 Plugin Name: Keon Toolset
 Plugin URI:  
 Description: A easy plugin to import dummy data for themes by Keon Themes.
-Version:     2.0.6
+Version:     2.0.7
 Author:      Keon Themes
 Author URI:  https://keonthemes.com
 License:     GPLv3 or later
@@ -16,7 +16,7 @@ Text Domain: keon-toolset
 define( 'KEON_TOOLSET_URL', plugin_dir_url( __FILE__ ).'demo/' );
 define( 'KEON_TEMPLATE_URL', plugin_dir_url( __FILE__ ) );
 define( 'KEON_TOOLSET_PATH', plugin_dir_path( __FILE__ ) );
-define( 'KEON_TOOLSET_VERSION', '2.0.6');
+define( 'KEON_TOOLSET_VERSION', '2.0.7');
 
 /**
  * Returns the currently active theme's name.
