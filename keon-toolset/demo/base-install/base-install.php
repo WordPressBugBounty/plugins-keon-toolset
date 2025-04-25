@@ -58,18 +58,18 @@ class Kt_Base_Install_Hooks {
                                     <a class= "close-base-notice close-base-button">Skip</a>
                                 </div>
                             </div>
+                            <div class="base-install-success">
+                                <div class="base-install-content"><h3>Thank you for installing %1$s. Click on Next to proceed to demo importer.</h3></div>
+                                <div class="base-install-btn">
+                                    <a class= "close-base-notice button button-primary">Next</a>
+                                </div>
+                            </div>
                             <div class="base-go-pro-bosa-prompt">
                                 <div class="go-pro-description">
                                 <h2 class="bosa-notice-title"> Upgrade to <a href="https://bosathemes.com/pricing" target="_blank" class="bosa-title">Bosa Pro</a></h2>
                                 <P>Unlock pro features, enhanced functionalities, customizable options & 100+ Starter sites.</p>
                                 </div>
                                 <a href="https://bosathemes.com/bosa-pro/#pricing" class="btn-primary" target="_blank">Buy Now</a>
-                            </div>
-                            <div class="base-install-success">
-                                <div class="base-install-content"><h3>Thank you for installing %1$s. Click on Next to proceed to demo importer.</h3></div>
-                                <div class="base-install-btn">
-                                    <a class= "close-base-notice button button-primary">Next</a>
-                                </div>
                             </div>
                         </div>
                     </div>',

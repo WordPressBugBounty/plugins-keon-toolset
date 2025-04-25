@@ -4,14 +4,14 @@ Tags: demo data, one click demo import, demo data importer
 Requires at least: 4.6
 Tested up to: 6.8
 Requires PHP: 4.6
-Stable tag: 2.0.7
+Stable tag: 2.0.8
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
 Import dummy data for themes developed by Keon Themes.
 
 == Description ==
-A easy plugin to import dummy data for themes by Keon Themes.
+A demo importer plugin that makes importing starter sites effortless for building your website!
 
 == Installation ==
 
@@ -39,6 +39,11 @@ https://pxhere.com/en/license [CCO License]
 Keon Toolset
 
 == Changelog ==
+
+= 2.0.8 =
+* Theme compatibility updated.
+* Plugin description updated.
+* Demo importer style update.
 
 = 2.0.7 =
 * Child theme compatibility updated.

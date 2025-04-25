@@ -25,9 +25,11 @@
     box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.5);
     width: 100%;
     max-width: 1050px;
+    min-height: 377px;
     padding: 50px 0 0;
     text-align: center;
     border-radius: 6px;
+    overflow: hidden;
 }
 .base-install-content {
     font-size: 15px;
@@ -120,6 +122,7 @@
 }
 .base-install-notice-inner .base-install-success {
     display: none;
+    margin: auto;
 }
 .base-install-btn .button {
     background-color: #5530af;
