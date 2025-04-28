@@ -5,7 +5,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 Plugin Name: Keon Toolset
 Plugin URI:  
 Description: A demo importer plugin that makes importing starter sites effortless for building your website!
-Version:     2.0.8
+Version:     2.0.9
 Author:      Keon Themes
 Author URI:  https://keonthemes.com
 License:     GPLv3 or later
@@ -16,7 +16,7 @@ Text Domain: keon-toolset
 define( 'KEON_TOOLSET_URL', plugin_dir_url( __FILE__ ).'demo/' );
 define( 'KEON_TEMPLATE_URL', plugin_dir_url( __FILE__ ) );
 define( 'KEON_TOOLSET_PATH', plugin_dir_path( __FILE__ ) );
-define( 'KEON_TOOLSET_VERSION', '2.0.8');
+define( 'KEON_TOOLSET_VERSION', '2.0.9');
 
 /**
  * Returns the currently active theme's name.

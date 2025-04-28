@@ -224,7 +224,7 @@ class Keon_Toolset_Hooks {
      *
      * @since    1.0.0
      */
-    public function keon_toolset_demo_import_lists(){
+    public function keon_toolset_demo_import_lists( $demos ){
 
         $theme_slug = keon_toolset_get_theme_slug();
         switch( $theme_slug ):
@@ -1649,7 +1649,7 @@ class Keon_Toolset_Hooks {
                 $demo_lists = array();
                 break;
         endswitch;
-        return $demo_lists;
+        return array_merge( $demo_lists, $demos );
     }
 
     /**
