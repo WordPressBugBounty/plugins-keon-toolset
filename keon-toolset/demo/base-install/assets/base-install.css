@@ -142,6 +142,7 @@
     font-size: 13px;
     margin-top: 10px;
     display: inline-block;
+    cursor: pointer;
 }
 .base-install-btn .button:hover {
     background: #C72E2E;
