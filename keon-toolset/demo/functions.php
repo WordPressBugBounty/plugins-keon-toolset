@@ -1630,9 +1630,9 @@ class Keon_Toolset_Hooks {
                 }
                 $demo_lists = get_transient( 'keon_toolset_demo_lists' );
                 break;
-            case 'bosa-veterinary-elementor':
+            case 'bosa-veterinary-care':
                 while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-veterinary-elementor-demo-list%2Ejson?ref=main' ) );
+                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-veterinary-care-demo-list%2Ejson?ref=main' ) );
                     if( is_wp_error( $request_demo_list_body ) ) {
                         return false; // Bail early
                     }
@@ -1645,9 +1645,9 @@ class Keon_Toolset_Hooks {
                 }
                 $demo_lists = get_transient( 'keon_toolset_demo_lists' );
                 break;
-            case 'bosa-ai-robotics-elementor':
+            case 'bosa-ai-robotics-sector':
                 while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-ai-robotics-elementor-demo-list%2Ejson?ref=main' ) );
+                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-ai-robotics-sector-demo-list%2Ejson?ref=main' ) );
                     if( is_wp_error( $request_demo_list_body ) ) {
                         return false; // Bail early
                     }
@@ -1827,8 +1827,8 @@ class Keon_Toolset_Hooks {
             case 'bosa-online-marketing':
             case 'bosa-law-firm':
             case 'shoppable-style':
-            case 'bosa-veterinary-elementor':
-            case 'bosa-ai-robotics-elementor':
+            case 'bosa-veterinary-care':
+            case 'bosa-ai-robotics-sector':
                 /*attachments IDS*/
                 $attachment_ids = array(
                     'banner_image',
