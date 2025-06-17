@@ -74,7 +74,9 @@ if (!class_exists('Keon_Toolset_Admin_Notice')) {
                     echo'<button class=" btn-primary keon-remind-me-later">Remind Me Later</button>';
                     echo '</div>';
                  echo '</div>';
-                 echo '<a href="#" id="keon-bosa-pro-dismiss" class="admin-notice-dismiss"><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></a>';
+                 echo '<a href="javascript:void(0)" id="keon-bosa-pro-dismiss" class="admin-notice-dismiss">
+                        <span class="keon-toolset-top-dissmiss-btn">Dismiss</span>
+                    </a>';
             echo '</div>';
         }
     }

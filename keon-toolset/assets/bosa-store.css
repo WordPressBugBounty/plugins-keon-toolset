@@ -210,9 +210,17 @@
     background-color: transparent;
     color: #CE4334;
 }
-.bosa-go-pro-notice .admin-notice-dismiss {
-    right: 0px;
+.bosa-go-pro-notice .admin-notice-dismiss,
+.bosa-go-pro-notice .notice-dismiss {
+    padding: 5px;
 }
+.keon-toolset-top-dissmiss-btn {
+    color: #d3d3d3;
+}
+.keon-toolset-top-dissmiss-btn:hover {
+    color: #aaa;
+}
+
 
 @media only screen and (min-width: 1400px) {
     .bosa-go-pro-notice .getting-img {
