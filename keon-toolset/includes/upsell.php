@@ -180,3 +180,11 @@ function upsell_customize_register( $wp_customize ) {
         )
     );   
 }
+
+if ( class_exists( 'ST_WOO_AI_REL_PRODUCTS' ) ) {
+    function keon_toolset_smart_related_products_affiliation() {
+        // return affiliated link
+        return 'https://r.freemius.com/11862/3463883/';
+    }
+    add_filter( 'st_woo_ai_rel_products_pro_link', 'keon_toolset_smart_related_products_affiliation' );
+}
