@@ -29,7 +29,9 @@ class Keon_Toolset_Hooks {
      */
     public function __construct() {
         add_action( 'switch_theme', array( $this, 'flush_transient' ) );
-
+        add_filter( 'advanced_export_include_options', array( $this, 'export_include_options' ) );
+        add_action( 'advanced_import_before_complete_screen', array( $this, 'update_elementskit_mega_menu_post' ) );
+        add_filter( 'advanced_import_update_value_elementskit_options', array( $this, 'update_elementskit_options' ) );
     }
 
     /**
@@ -1735,6 +1737,21 @@ class Keon_Toolset_Hooks {
                 }
                 $demo_lists = get_transient( 'keon_toolset_demo_lists' );
                 break;
+            case 'bosa-event-organizer':
+                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
+                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-event-organizer-demo-list%2Ejson?ref=main' ) );
+                    if( is_wp_error( $request_demo_list_body ) ) {
+                        return false; // Bail early
+                    }
+                    $demo_list_std     = json_decode( $request_demo_list_body, true );
+                    $demo_list_array   = (array) $demo_list_std;
+                    $demo_list_content = $demo_list_array['content'];
+                    $demo_lists_json   = base64_decode( $demo_list_content );
+                    $demo_lists        = json_decode( $demo_lists_json, true );
+                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
+                }
+                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
+                break;
             default:
                 $demo_lists = array();
                 break;
@@ -1909,6 +1926,7 @@ class Keon_Toolset_Hooks {
             case 'shoppable-electronics':
             case 'bosa-business-solutions':
             case 'bosa-portfolio-bio':
+            case 'bosa-event-organizer':
                 /*attachments IDS*/
                 $attachment_ids = array(
                     'banner_image',
@@ -1967,6 +1985,87 @@ class Keon_Toolset_Hooks {
     public function kt_advance_import_transient(){
         $import_option = get_transient( 'options.json' );
         set_transient('imported_option',$import_option);
+    }
+
+    /**
+     * Update Mega Menu active nav menu ids in demo import. 
+     *
+     * @since    2.1.8
+     */
+    function update_elementskit_options( $value = "", $option = "elementskit_options" ){
+        $megamenu_settings = $value['megamenu_settings'];
+        $replaced_ids = array();
+        if( is_array( $megamenu_settings ) ){
+            foreach( $megamenu_settings as $location => $enabled ){
+                if( $enabled ){
+                    $term_id = '';
+                    if( strpos( $location, 'menu_location' ) !== false  ){
+                        $term_id = substr(  $location, 14 );
+                    }
+                    $advanced_import_obj = advanced_import_admin();
+                    $new_id = $advanced_import_obj->imported_term_id( $term_id );
+
+                    $value['megamenu_settings']['menu_location_'.$new_id]= array( 
+                        'is_enabled' => 1
+                    );
+                    
+                    $replaced_ids[] = $new_id;
+                    if( $term_id != $new_id && !in_array($term_id, $replaced_ids) ){
+                        unset( $value['megamenu_settings']['menu_location_'.$term_id] );
+                    }
+                }
+            }
+        }
+        $post_ids = get_transient( 'imported_post_ids' );
+        set_transient('kt_adim_imported_post_ids', $post_ids, 60 * 60 * 24);
+        return $value;
+    }
+
+    /**
+     * Updates post_title and post_name of elementskit_content post_type in demo import. 
+     *
+     * @since    2.1.8
+     */
+    function update_elementskit_mega_menu_post(){
+        
+        $post_ids = get_transient( 'kt_adim_imported_post_ids' );
+        set_transient('imported_post_ids', $post_ids, 60 * 60 * 24);
+
+        $query = new WP_Query( array( 'post_type' => 'elementskit_content', ) );
+        $posts = $query->get_posts();
+        if( is_array( $posts ) && !empty( $posts ) ){
+            foreach( $posts as $key => $value ){
+                $old_id = '';
+                if( strpos( $value->post_title, 'dynamic-content-megamenu-menuitem' ) !== false  ){
+                    $old_id = substr(  $value->post_title, 33 );
+                    $advanced_import_obj = advanced_import_admin();
+                    $new_id = $advanced_import_obj->imported_post_id( $old_id );
+                    $elementskit_post = array(
+                        'ID'           => $value->ID,
+                        'post_title'   => 'dynamic-content-megamenu-menuitem'.$new_id,
+                        'post_name'   => 'dynamic-content-megamenu-menuitem'.$new_id,
+                          
+                    );
+
+                    // Update the specified post into the database
+                    wp_update_post( $elementskit_post );
+                }
+            }
+        }
+        delete_transient( 'kt_adim_imported_post_ids' );
+        delete_transient( 'imported_post_ids' );
+    }
+
+    /**
+     * Includes options in advanced export plugin demo zip.
+     *
+     * @since    2.1.8
+     */
+    public function export_include_options( $included_options ){
+        $my_options = array(
+            'elementskit_options',
+        );
+        return array_unique (array_merge( $included_options, $my_options));
     }
 }
 
