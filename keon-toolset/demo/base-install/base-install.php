@@ -37,6 +37,25 @@ class Kt_Base_Install_Hooks {
         wp_enqueue_script( 'kt-base-install', plugin_dir_url( __FILE__ ) . 'assets/base-install.js', array( 'jquery' ), '1.0.0', true );
 
         $base_theme = kt_get_base_theme();
+
+        $site_link = '';
+        $site_price_link = '';
+        $base_theme_title = '';
+        $base_theme_description = '';
+
+        if ( $base_theme['name'] == 'Bosa' ) {
+            $site_link = 'https://bosathemes.com/pricing';
+            $site_price_link = 'https://bosathemes.com/bosa-pro/#pricing';
+            $base_theme_title = 'Bosa Pro';
+            $base_theme_description = 'Unlock pro features, enhanced functionalities, customizable options & Full Starter sites Library.';
+        }
+        else {
+            $site_link = 'https://bosathemes.com/shoppable-pro/';
+            $site_price_link = 'https://bosathemes.com/shoppable-pro/#pricing';
+            $base_theme_title = 'Shoppable Pro Extension';
+            $base_theme_description = 'Unlock Pro and get instant access to Full Starter Sites Library.';
+        }
+
         $action = __( 'Install and Activate', 'keon-toolset' );
         if( kt_base_theme_installed() ){
             $action = __( 'Activate', 'keon-toolset' );
@@ -51,30 +70,41 @@ class Kt_Base_Install_Hooks {
                     '<div class="base-install-notice-outer">
                         <div class="base-install-notice-inner">
                             <div class="base-install-prompt" >
-                                <div class="base-install-content"><h2 class="base-install-title">%1$s</h2><p>We recommend to %2$s %1$s theme as all our demo works perfectly with this theme. You can still try our demo on any bosa theme but it might not look as you see on our demo.</p></div>
+                                <div class="base-install-content">
+                                    <h2 class="base-install-title">%1$s</h2>
+                                    <p>'.esc_html__('We recommend to','keon-toolset').' %2$s %1$s '.esc_html__('theme as all our demo works perfectly with this theme. You can still try our demo on any bosa theme but it might not look as you see on our demo.','keon-toolset').'</p>
+                                </div>
                                 <div class="base-install-btn">
                                     <a class= "install-base-theme button button-primary">%2$s %1$s</a>
                                     <br>
-                                    <a class= "close-base-notice close-base-button">Skip</a>
+                                    <a class="close-base-notice close-base-button">'.esc_html__( 'Skip', 'keon-toolset' ).'</a>
                                 </div>
                             </div>
                             <div class="base-install-success">
-                                <div class="base-install-content"><h3>Thank you for installing %1$s. Click on Next to proceed to demo importer.</h3></div>
+                                <div class="base-install-content">
+                                    <h3>'.esc_html__('Thank you for installing','keon-toolset').' %1$s'.esc_html__('.  Click on Next to proceed to demo importer.','keon-toolset').'</h3>
+                                </div>
                                 <div class="base-install-btn">
-                                    <a class= "close-base-notice button button-primary">Next</a>
+                                    <a class= "close-base-notice button button-primary">'.esc_html__('Next','keon-toolset').'</a>
                                 </div>
                             </div>
                             <div class="base-go-pro-bosa-prompt">
                                 <div class="go-pro-description">
-                                <h2 class="bosa-notice-title"> Upgrade to <a href="https://bosathemes.com/pricing" target="_blank" class="bosa-title">Bosa Pro</a></h2>
-                                <P>Unlock pro features, enhanced functionalities, customizable options & 100+ Starter sites.</p>
+                                    <h2 class="bosa-notice-title">'.esc_html__('Upgrade to','keon-toolset').' 
+                                        <a href="%3$s" target="_blank" class="bosa-title">%5$s</a>
+                                    </h2>
+                                    <p>%6$s</p>
                                 </div>
-                                <a href="https://bosathemes.com/bosa-pro/#pricing" class="btn-primary" target="_blank">Buy Now</a>
+                                <a href="%4$s" class="btn-primary" target="_blank">'.esc_html__('Buy Now','keon-toolset').'</a>
                             </div>
                         </div>
                     </div>',
-                    $base_theme['name'],
-                    $action
+                    esc_html__( $base_theme['name'], 'keon-toolset' ),
+                    esc_html($action),
+                    esc_url($site_link),
+                    esc_url($site_price_link),                    
+                    esc_html__($base_theme_title, 'keon-toolset'),
+                    esc_html__($base_theme_description, 'keon-toolset'),
                 ),
             )
         );
@@ -94,7 +124,8 @@ class Kt_Base_Install_Hooks {
         $base_theme = kt_get_base_theme();
         if ( kt_base_theme_installed() ) {
             switch_theme( $base_theme['slug'] );
-            wp_send_json_success();
+            $current_theme = keon_toolset_get_theme_slug();
+            wp_send_json_success($current_theme);
         }
 
         require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
@@ -122,7 +153,8 @@ class Kt_Base_Install_Hooks {
         }
 
         switch_theme( $base_theme['slug'] );
-        wp_send_json_success();
+        $current_theme = keon_toolset_get_theme_slug();
+        wp_send_json_success($current_theme);
         die();
     }
 }

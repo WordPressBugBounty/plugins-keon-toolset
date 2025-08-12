@@ -89,6 +89,7 @@
     font-size: 1.1em;
     font-weight: 500;
     text-decoration: none;
+    box-shadow: none;
 }
 .base-install-notice-inner .base-go-pro-bosa-prompt .bosa-title:hover {
     background-color: transparent;
@@ -106,6 +107,7 @@
     margin: 0px;
     text-align: center;
     line-height: 1.4;
+    box-shadow: none;
     -webkit-transition: background-color 0.4s;
     -ms-transition: background-color 0.4s;
     transition: background-color 0.4s;
@@ -147,6 +149,7 @@
 .base-install-btn .button:hover {
     background: #C72E2E;
     color: #ffffff;
+    box-shadow: none;
 }
 .base-install-btn .close-base-button:hover {
     color: #C72E2E;

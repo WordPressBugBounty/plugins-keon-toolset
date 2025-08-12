@@ -21,18 +21,20 @@ function keon_toolset_bosa_store() {
 function gutener_upsell_admin_notice(){
     if( !get_user_meta( get_current_user_id(), 'dismiss_gutener_upsell_notice' ) ){
         $pro_img_url = KEON_TEMPLATE_URL . 'assets/img/gutener-pro.png';
-        echo '<div class="keon-notice">';
-            echo '<div class="getting-img">';
-                echo '<img id="" src="'.esc_url( $pro_img_url ).'" />';
-            echo '</div>';
-            echo '<div class="getting-content">';
-                echo '<h2>Go PRO for More Features</h2>';
-                echo '<p class="text">Get <a href="https://keonthemes.com/downloads/gutener-pro" target="_blank">Gutener Pro</a> for more stunning elements, demos and customization options.</p>';
-                echo '<a href="https://keonthemes.com/downloads/gutener-pro" class="button button-primary" target="_blank">Theme Details</a>';
-                echo '<a href="https://keonthemes.com/downloads/gutener-pro" class="button button-primary" target="_blank">Buy Gutener Pro</a>';
-             echo '</div>';
-            echo '<a href="' . esc_url( wp_nonce_url( add_query_arg( 'gutener-upsell-notice-dismissed', 'dismiss_gutener_upsell_notice' ), 'gutener_upsell_state', 'gutener_upsell_nonce' ) ) . '" class="admin-notice-dismiss">Dismiss<button type="button" class="notice-dismiss"></button></a>';
-        echo '</div>';
+        ?>
+        <div class="keon-notice">
+            <div class="getting-img">
+                <img id="" src="<?php echo esc_url( $pro_img_url ); ?>" />
+            </div>
+            <div class="getting-content">
+                <h2><?php esc_html_e('Go PRO for More Features', 'keon-toolset');?></h2>
+                <p class="text">Get <a href="https://keonthemes.com/downloads/gutener-pro" target="_blank"><?php esc_html_e('Gutener Pro', 'keon-toolset');?></a> <?php esc_html_e('for more stunning elements, demos and customization options.', 'keon-toolset');?></p>
+                <a href="<?php echo esc_url( 'https://keonthemes.com/downloads/gutener-pro' ); ?>" class="button button-primary" target="_blank"><?php esc_html_e('Theme Details', 'keon-toolset');?></a>
+                <a href="<?php echo esc_url( 'https://keonthemes.com/downloads/gutener-pro' ); ?>" class="button button-primary" target="_blank"><?php esc_html_e('Buy Gutener Pro', 'keon-toolset');?></a>
+             </div>
+            <a href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'gutener-upsell-notice-dismissed', 'dismiss_gutener_upsell_notice' ), 'gutener_upsell_state', 'gutener_upsell_nonce' ) ); ?>" class="admin-notice-dismiss"><?php esc_html_e('Dismiss', 'keon-toolset');?><button type="button" class="notice-dismiss"></button></a>
+        </div>
+        <?php 
     }
 }
 
@@ -44,18 +46,20 @@ function gutener_upsell_admin_notice(){
 function keon_store_admin_notice(){
     if( !get_user_meta( get_current_user_id(), 'store_notice_dismissed' ) ){
         $store_img_url = KEON_TEMPLATE_URL . 'assets/img/bosa-store.png';
-        echo '<div class="keon-notice">';
-            echo '<div class="getting-img">';
-            echo '<img id="" src="'.esc_url( $store_img_url ).'" />';
-            echo '</div>';
-            echo '<div class="getting-content">';
-                echo '<h2>New Awesome FREE WooCommerce Theme - Bosa Store</h2>';
-                echo '<p class="text"><a href="https://bosathemes.com/bosa-store" target="_blank">Bosa Store</a> - new free WooCommerce theme from BosaThemes. Check out theme <a href="https://demo.bosathemes.com/bosa/store" target="_blank">Demo</a> that can be imported for FREE with simple click.</p>';
-                echo '<a href="https://demo.bosathemes.com/bosa/store" class="button button-primary">View Demo</a>';
-                echo '<a href="https://bosathemes.com/bosa-store" class="button button-primary">Theme Details</a>';
-            echo '</div>';
-            echo '<a href="' . esc_url( wp_nonce_url( add_query_arg( 'store-notice-dismissed', 'dismiss_store_notice' ), 'store_notice_state', 'store_notice_nonce' ) ) . '" class="admin-notice-dismiss">Dismiss<button type="button" class="notice-dismiss"></button></a>';
-        echo '</div>';
+        ?>        
+        <div class="keon-notice">
+            <div class="getting-img">
+            <img id="" src="<?php echo esc_url( $store_img_url ); ?>" />
+            </div>
+            <div class="getting-content">
+                <h2><?php esc_html_e('New Awesome FREE WooCommerce Theme - Bosa Store', 'keon-toolset');?></h2>
+                <p class="text"><a href="<?php echo esc_url( 'https://bosathemes.com/bosa-store' ); ?>" target="_blank"><?php esc_html_e('Bosa Store', 'keon-toolset');?></a><?php esc_html_e(' - new free WooCommerce theme from BosaThemes. Check out theme ', 'keon-toolset');?><a href="<?php echo esc_url( 'https://bosathemes.com/bosa-store' ); ?>" target="_blank"><?php esc_html_e('Demo', 'keon-toolset');?></a><?php esc_html_e(' that can be imported for FREE with simple click.', 'keon-toolset');?></p>
+                <a href="<?php echo esc_url( 'https://demo.bosathemes.com/bosa/store' ); ?>" class="button button-primary"><?php esc_html_e('View Demo', 'keon-toolset');?></a>
+                <a href="<?php echo esc_url( 'https://bosathemes.com/bosa-store' ); ?>" class="button button-primary"><?php esc_html_e('Theme Details', 'keon-toolset');?></a>
+            </div>
+            <a href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'store-notice-dismissed', 'dismiss_store_notice' ), 'store_notice_state', 'store_notice_nonce' ) ); ?>" class="admin-notice-dismiss"><?php esc_html_e('Dismiss', 'keon-toolset');?><button type="button" class="notice-dismiss"></button></a>
+        </div>
+        <?php 
     }
 }
 

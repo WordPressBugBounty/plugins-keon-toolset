@@ -227,1536 +227,156 @@ class Keon_Toolset_Hooks {
      * @since    1.0.0
      */
     public function keon_toolset_demo_import_lists( $demos ){
-
+        if( get_transient( 'keon_toolset_demo_lists' ) ){
+            return array_merge( get_transient( 'keon_toolset_demo_lists' ), $demos );
+        }
         $theme_slug = keon_toolset_get_theme_slug();
-        switch( $theme_slug ):
-            case 'gutener-pro':
-            case 'gutener':
-            case 'gutener-charity-ngo':
-            case 'gutener-pro-child':
-            case 'gutener-medical':
-            case 'blog-gutener':
-            case 'gutener-consultancy':
-            case 'gutener-business':
-            case 'gutener-corporate':
-            case 'gutener-education':
-            case 'gutener-corporate-business':
-                // Get the demos list
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/gutener%2Fdemolist%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
+        $demo_lists = array();
+        if( keon_toolset_theme_check( 'gutener' ) ){
+            // Get the demos list
+            while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
+                $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/gutener%2Fdemolist%2Ejson?ref=main' ) );
+                if( is_wp_error( $request_demo_list_body ) ) {
+                    return $demos; // Bail early
+                }
+                $demo_list_std     = json_decode( $request_demo_list_body, true );
+                $demo_list_array   = (array) $demo_list_std;
+                $demo_list_content = $demo_list_array['content'];
+                $demo_lists_json   = base64_decode( $demo_list_content );
+                $demo_lists        = json_decode( $demo_lists_json, true );
+                set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
+            }
+            while( empty( get_transient( 'keon_toolset_theme_state_list' ) ) ){
+                $request_state_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/gutener%2Fstate%2Ejson?ref=main' ) );
+                if( is_wp_error( $request_state_list_body ) ) {
+                    return $demos; // Bail early
+                }
+                $state_list_std     = json_decode( $request_state_list_body,true );
+                $state_list_array   = (array) $state_list_std;
+                $state_list_content = $state_list_array['content'];
+                $state_lists_json   = base64_decode( $state_list_content );
+                $state_lists        = json_decode( $state_lists_json, true );
+                $theme_state_list   = $state_lists[$theme_slug];
+                set_transient( 'keon_toolset_theme_state_list', $theme_state_list, DAY_IN_SECONDS );
+            }
+            
+            $demo_lists = get_transient( 'keon_toolset_demo_lists' );
+            $theme_state_list = get_transient( 'keon_toolset_theme_state_list' );
+            $i = 0;
+            
+            foreach($theme_state_list as $list){
+                if( !is_array( $list ) ){
+                    $pos = array_search( $list, array_column( $demo_lists,'title' ) );
+                    if( !$pos === FALSE || $pos == 0 ){
+                        $demo_lists[$pos]['is_pro'] = false;
+                        $this->array_move( $demo_lists, $pos, $i );   
                     }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
+                }else{
+                    $pro_item = $list['pro'];
+                    $pos = array_search( $pro_item,array_column( $demo_lists,'title' ) );
+                    if( !$pos === FALSE ){
+                        $this->array_move( $demo_lists, $pos, $i );
+                    }
+                }
+                $i++;
+            }
+            foreach ( $demo_lists as &$val ){
+                $hit = $this->in_multiarray( $val['title'], $theme_state_list );
+                if( !$hit ){
+                    $pos_demo = array_search( $val['title'], array_column( $demo_lists,'title' ) );
+                    array_splice( $demo_lists, $pos_demo, 1 );
+                }
+            }
+            set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
+            return array_merge( $demo_lists, $demos );
+        }elseif( keon_toolset_theme_check( 'bosa' ) ){
+            if( $theme_slug == 'bosa' ){
+                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
+                    $bosa_demo_list = 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fv2%2Fbosa-demo-list%2Ejson?ref=main';
+                    
+                    $bosa_demo_list_body = wp_remote_retrieve_body( wp_remote_get( $bosa_demo_list ) );
+                    if( is_wp_error( $bosa_demo_list_body ) ) {
+                        return $demos; // Bail early
+                    }
+                    $demo_list_std     = json_decode( $bosa_demo_list_body, true );
                     $demo_list_array   = (array) $demo_list_std;
                     $demo_list_content = $demo_list_array['content'];
                     $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                while( empty( get_transient( 'keon_toolset_theme_state_list' ) ) ){
-                    $request_state_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/gutener%2Fstate%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_state_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $state_list_std     = json_decode( $request_state_list_body,true );
-                    $state_list_array   = (array) $state_list_std;
-                    $state_list_content = $state_list_array['content'];
-                    $state_lists_json   = base64_decode( $state_list_content );
-                    $state_lists        = json_decode( $state_lists_json, true );
-                    $theme_state_list   = $state_lists[$theme_slug];
-                    set_transient( 'keon_toolset_theme_state_list', $theme_state_list, DAY_IN_SECONDS );
-                }
-                
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                $theme_state_list = get_transient( 'keon_toolset_theme_state_list' );
-                $i = 0;
-                
-                foreach($theme_state_list as $list){
-                    if( !is_array( $list ) ){
-                        $pos = array_search( $list, array_column( $demo_lists,'title' ) );
-                        if( !$pos === FALSE || $pos == 0 ){
-                            $demo_lists[$pos]['is_pro'] = false;
-                            $this->array_move( $demo_lists, $pos, $i );   
-                        }
-                    }else{
-                        $pro_item = $list['pro'];
-                        $pos = array_search( $pro_item,array_column( $demo_lists,'title' ) );
-                        if( !$pos === FALSE ){
-                            $this->array_move( $demo_lists, $pos, $i );
-                        }
-                    }
-                    $i++;
-                }
-                foreach ( $demo_lists as &$val ){
-                    $hit = $this->in_multiarray( $val['title'], $theme_state_list );
-                    if( !$hit ){
-                        $pos_demo = array_search( $val['title'], array_column( $demo_lists,'title' ) );
-                        array_splice( $demo_lists, $pos_demo, 1 );
-                    }
-                }      
+                    $bosa_demos_decoded = json_decode( $demo_lists_json, true );
+                    $demo_lists = is_array( $bosa_demos_decoded ) ? $bosa_demos_decoded : array();
 
-                break;
-            case 'bosa':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
                     set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
                 }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-pro':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-pro-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-business':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-business-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-corporate-dark':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-corporate-dark-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-consulting':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-consulting-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-blog-dark':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-blog-dark-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-charity':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-charity-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-             case 'bosa-music':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-music-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-travelers-blog':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-travelers-blog-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-insurance':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-insurance-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-blog':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-blog-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-marketing':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-marketing-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-lawyer':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-lawyer-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-wedding':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-wedding-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-corporate-business':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-corporate-business-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-fitness':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-fitness-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-finance':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-finance-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-news-blog':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-news-blog-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-store':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-store-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-ecommerce':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-ecommerce-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-shop':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-shop-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-shopper':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-shopper-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-online-shop':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-online-shop-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-storefront':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-storefront-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-ecommerce-shop':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-ecommerce-shop-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-shop-store':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-shop-store-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-construction-shop':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-construction-shop-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break; 
-            case 'bosa-travel-shop':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-travel-shop-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-beauty-shop':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-beauty-shop-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break; 
-            case 'bosa-shop-dark':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-shop-dark-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-charity-fundraiser':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-charity-fundraiser-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-shopfront':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-shopfront-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-medical-health':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-medical-health-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-ev-charging-station':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-ev-charging-station-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-marketplace':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-marketplace-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break; 
-            case 'bosa-travel-tour':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-travel-tour-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-education-hub':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-education-hub-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-digital-agency':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-digital-agency-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-decor-shop':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-decor-shop-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-biz':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-biz-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-construction-industrial':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-construction-industrial-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-agency-dark':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-agency-dark-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-             case 'bosa-online-education':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-online-education-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'hello-shoppable':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/hello-shoppable%2Fhello-shoppable-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-business-services':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-business-services-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-event-conference':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-event-conference-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-rental-car':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-rental-car-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-real-estate':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-real-estate-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-restaurant-cafe':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-restaurant-cafe-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-digital-marketing':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-digital-marketing-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'shoppable-fashion':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/hello-shoppable%2Fshoppable-fashion-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-finance-business':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-finance-business-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'shoppable-wardrobe':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/hello-shoppable%2Fshoppable-wardrobe-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-kindergarten':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-kindergarten-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-portfolio-resume':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-portfolio-resume-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'shoppable-marketplace':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/hello-shoppable%2Fshoppable-marketplace-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-corpo':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-corpo-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-accounting':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-accounting-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'shoppable-grocery-store':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/hello-shoppable%2Fshoppable-grocery-store-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-dental-care':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-dental-care-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'shoppable-furnish':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/hello-shoppable%2Fshoppable-furnish-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-mobile-app':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-mobile-app-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-educare':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-educare-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break; 
-            case 'bosa-plumber':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-plumber-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'shoppable-jewelry':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/hello-shoppable%2Fshoppable-jewelry-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-ai-robotics':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-ai-robotics-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'shoppable-camera':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/hello-shoppable%2Fshoppable-camera-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-hotel':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-hotel-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-media-marketing':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-media-marketing-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;  
-            case 'bosa-business-firm':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-business-firm-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;   
-            case 'bosa-photograph':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-photograph-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-interior-design':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-interior-design-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-cleaning-service':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-cleaning-service-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;       
-            case 'bosa-veterinary':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-veterinary-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;     
-            case 'bosa-yoga':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-yoga-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-logistics':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-logistics-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break; 
-            case 'bosa-crypto':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-crypto-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-clinic':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-clinic-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-it-services':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-it-services-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;      
-            case 'bosa-university':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-university-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-creative-agency':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-creative-agency-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;   
-            case 'shoppable-beauty':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/hello-shoppable%2Fshoppable-beauty-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;  
-            case 'bosa-garden-care':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-garden-care-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break; 
-            case 'bosa-construction-company':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-construction-company-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;   
-            case 'bosa-travel-agency':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-travel-agency-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-business-agency':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-business-agency-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-online-marketing':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-online-marketing-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-law-firm':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-law-firm-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'shoppable-style':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/hello-shoppable%2Fshoppable-style-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-veterinary-care':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-veterinary-care-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-ai-robotics-sector':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-ai-robotics-sector-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-charity-firm':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-charity-firm-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-restaurant-inn':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-restaurant-inn-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'shoppable-electronics':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/hello-shoppable%2Fshoppable-electronics-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-business-solutions':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-business-solutions-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-portfolio-bio':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-portfolio-bio-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            case 'bosa-event-organizer':
-                while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
-                    $request_demo_list_body = wp_remote_retrieve_body( wp_remote_get( 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fbosa-event-organizer-demo-list%2Ejson?ref=main' ) );
-                    if( is_wp_error( $request_demo_list_body ) ) {
-                        return false; // Bail early
-                    }
-                    $demo_list_std     = json_decode( $request_demo_list_body, true );
-                    $demo_list_array   = (array) $demo_list_std;
-                    $demo_list_content = $demo_list_array['content'];
-                    $demo_lists_json   = base64_decode( $demo_list_content );
-                    $demo_lists        = json_decode( $demo_lists_json, true );
-                    set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
-                }
-                $demo_lists = get_transient( 'keon_toolset_demo_lists' );
-                break;
-            default:
-                $demo_lists = array();
-                break;
-        endswitch;
-        return array_merge( $demo_lists, $demos );
+                return array_merge( $demo_lists, $demos );
+            }
+            while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
+                $full_args_list = 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fv2%2Fbosa-full-args-demo-list%2Ejson?ref=main';
+                
+                $full_args_list_body = wp_remote_retrieve_body( wp_remote_get( $full_args_list ) );
+                if( is_wp_error( $full_args_list_body ) ) {
+                    return $demos; // Bail early
+                }
+                $demo_list_std     = json_decode( $full_args_list_body, true );
+                $demo_list_array   = (array) $demo_list_std;
+                $demo_list_content = $demo_list_array['content'];
+                $demo_lists_json   = base64_decode( $demo_list_content );
+                $full_args_decoded     = json_decode( $demo_lists_json, true );
+                $demo_lists = is_array( $full_args_decoded ) ? $full_args_decoded : array();          
+                set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
+            }
+
+            if( $theme_slug == 'bosa-pro' ){
+                return array_merge( $demo_lists, $demos );
+            }
+
+            // common demo list
+            while( empty( get_transient( 'keon_toolset_bosa_common_demo_lists' ) ) ){
+                $common_list = 'https://gitlab.com/api/v4/projects/53725287/repository/files/bosa%2Fv2%2Fbosa-common-demo-list%2Ejson?ref=main';
+                $common_list_body = wp_remote_retrieve_body( wp_remote_get( $common_list ) );
+                if( is_wp_error( $common_list_body ) ) {
+                    return $demos; // Bail early
+                }
+                $demo_list_std     = json_decode( $common_list_body, true );
+                $demo_list_array   = (array) $demo_list_std;
+                $demo_list_content = $demo_list_array['content'];
+                $demo_lists_json   = base64_decode( $demo_list_content );
+                $common_list_decoded     = json_decode( $demo_lists_json, true );
+                $common_demo_list = is_array( $common_list_decoded ) ? $common_list_decoded : array();
+                
+                set_transient( 'keon_toolset_bosa_common_demo_lists', $common_demo_list, DAY_IN_SECONDS );
+            }
+
+            if( $theme_slug && !empty( $demo_lists ) && !empty( $common_demo_list ) ){
+                $theme_list[$theme_slug] = isset( $demo_lists[$theme_slug] ) ? $demo_lists[$theme_slug] : array();
+                $theme_list[$theme_slug.'-pro'] = isset( $common_demo_list[$theme_slug.'-pro'] ) ? $common_demo_list[$theme_slug.'-pro'] : array();
+                $demo_lists =  array_merge( $theme_list, $common_demo_list, $theme_list );
+            }
+            set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
+            return array_merge( $demo_lists, $demos );
+        }elseif( keon_toolset_theme_check( 'shoppable' ) ){
+            while( empty( get_transient( 'keon_toolset_demo_lists' ) ) ){
+                $shoppable_demo_list = 'https://gitlab.com/api/v4/projects/53725287/repository/files/hello-shoppable%2Fv2%2Fshoppable-demo-list%2Ejson?ref=main';
+                $shoppable_demo_list_body = wp_remote_retrieve_body( wp_remote_get( $shoppable_demo_list ) );
+                if( is_wp_error( $shoppable_demo_list_body ) ) {
+                    return $demos; // Bail early
+                }
+                $demo_list_std     = json_decode( $shoppable_demo_list_body, true );
+                $demo_list_array   = (array) $demo_list_std;
+                $demo_list_content = $demo_list_array['content'];
+                $demo_lists_json   = base64_decode( $demo_list_content );
+                $shoppable_demos_decoded     = json_decode( $demo_lists_json, true );
+                $shoppable_demos = is_array( $shoppable_demos_decoded ) ? $shoppable_demos_decoded : array();
+
+                if( $theme_slug && !empty( $shoppable_demos ) ){
+                    $theme_list[$theme_slug] = isset( $shoppable_demos[$theme_slug] ) ? $shoppable_demos[$theme_slug] : array();
+                    $theme_list[$theme_slug.'-pro'] = isset( $shoppable_demos[$theme_slug.'-pro'] ) ? $shoppable_demos[$theme_slug.'-pro'] : array();
+                    $demo_lists = array_merge( $theme_list, $shoppable_demos );
+                }
+                set_transient( 'keon_toolset_demo_lists', $demo_lists, DAY_IN_SECONDS );
+            }
+            return array_merge( $demo_lists, $demos );
+        }
+        return $demos;
     }
 
     /**
@@ -1801,6 +421,7 @@ class Keon_Toolset_Hooks {
         delete_transient( 'keon_toolset_theme_state_list' );
         delete_transient( 'keon_toolset_template_lists' );
         delete_transient( 'keon_toolset_template_state_list' );
+        delete_transient( 'keon_toolset_bosa_common_demo_lists' );
     }
 
     /**
@@ -1993,7 +614,7 @@ class Keon_Toolset_Hooks {
      * @since    2.1.8
      */
     function update_elementskit_options( $value = "", $option = "elementskit_options" ){
-        $megamenu_settings = $value['megamenu_settings'];
+        $megamenu_settings = isset( $value['megamenu_settings'] ) ? $value['megamenu_settings'] : '';
         $replaced_ids = array();
         if( is_array( $megamenu_settings ) ){
             foreach( $megamenu_settings as $location => $enabled ){
@@ -2029,31 +650,33 @@ class Keon_Toolset_Hooks {
     function update_elementskit_mega_menu_post(){
         
         $post_ids = get_transient( 'kt_adim_imported_post_ids' );
-        set_transient('imported_post_ids', $post_ids, 60 * 60 * 24);
+        if( $post_ids !== false ){
+            set_transient('imported_post_ids', $post_ids, 60 * 60 * 24);
 
-        $query = new WP_Query( array( 'post_type' => 'elementskit_content', ) );
-        $posts = $query->get_posts();
-        if( is_array( $posts ) && !empty( $posts ) ){
-            foreach( $posts as $key => $value ){
-                $old_id = '';
-                if( strpos( $value->post_title, 'dynamic-content-megamenu-menuitem' ) !== false  ){
-                    $old_id = substr(  $value->post_title, 33 );
-                    $advanced_import_obj = advanced_import_admin();
-                    $new_id = $advanced_import_obj->imported_post_id( $old_id );
-                    $elementskit_post = array(
-                        'ID'           => $value->ID,
-                        'post_title'   => 'dynamic-content-megamenu-menuitem'.$new_id,
-                        'post_name'   => 'dynamic-content-megamenu-menuitem'.$new_id,
-                          
-                    );
+            $query = new WP_Query( array( 'post_type' => 'elementskit_content' ) );
+            $posts = $query->get_posts();
+            if( is_array( $posts ) && !empty( $posts ) ){
+                foreach( $posts as $key => $value ){
+                    $old_id = '';
+                    if( strpos( $value->post_title, 'dynamic-content-megamenu-menuitem' ) !== false  ){
+                        $old_id = substr(  $value->post_title, 33 );
+                        $advanced_import_obj = advanced_import_admin();
+                        $new_id = $advanced_import_obj->imported_post_id( $old_id );
+                        $elementskit_post = array(
+                            'ID'           => $value->ID,
+                            'post_title'   => 'dynamic-content-megamenu-menuitem'.$new_id,
+                            'post_name'   => 'dynamic-content-megamenu-menuitem'.$new_id,
+                              
+                        );
 
-                    // Update the specified post into the database
-                    wp_update_post( $elementskit_post );
+                        // Update the specified post into the database
+                        wp_update_post( $elementskit_post );
+                    }
                 }
             }
+            delete_transient( 'kt_adim_imported_post_ids' );
+            delete_transient( 'imported_post_ids' );
         }
-        delete_transient( 'kt_adim_imported_post_ids' );
-        delete_transient( 'imported_post_ids' );
     }
 
     /**
