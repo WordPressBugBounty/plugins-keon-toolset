@@ -5,7 +5,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 Plugin Name: Keon Toolset
 Plugin URI:  
 Description: A demo importer plugin that makes importing starter sites effortless for building your website!
-Version:     2.2.0
+Version:     2.2.1
 Author:      Keon Themes
 Author URI:  https://keonthemes.com
 License:     GPLv3 or later
@@ -16,7 +16,7 @@ Text Domain: keon-toolset
 define( 'KEON_TOOLSET_URL', plugin_dir_url( __FILE__ ).'demo/' );
 define( 'KEON_TEMPLATE_URL', plugin_dir_url( __FILE__ ) );
 define( 'KEON_TOOLSET_PATH', plugin_dir_path( __FILE__ ) );
-define( 'KEON_TOOLSET_VERSION', '2.2.0');
+define( 'KEON_TOOLSET_VERSION', '2.2.1');
 
 /**
  * Returns the currently active theme's name.
@@ -66,7 +66,7 @@ add_filter( 'admin_enqueue_scripts', array( $plugin_admin, 'enqueue_scripts' ), 
 add_action( 'advanced_import_replace_term_ids', array( $plugin_admin, 'replace_term_ids' ), 20 );
 add_action( 'advanced_import_replace_post_ids', array( $plugin_admin, 'replace_attachment_ids' ), 30 );
 
-if( ( keon_toolset_theme_check( 'shoppable' ) && !keon_toolset_theme_check( 'hello-shoppable' ) ) || ( keon_toolset_theme_check( 'bosa-media-marketing' ) || keon_toolset_theme_check( 'bosa-business-firm' ) || keon_toolset_theme_check( 'bosa-photograph' ) || keon_toolset_theme_check( 'bosa-interior-design' ) || keon_toolset_theme_check( 'bosa-cleaning-service' ) || keon_toolset_theme_check( 'bosa-veterinary' ) || keon_toolset_theme_check( 'bosa-yoga' ) || keon_toolset_theme_check( 'bosa-logistics' ) || keon_toolset_theme_check( 'bosa-crypto' ) || keon_toolset_theme_check( 'bosa-clinic' ) || keon_toolset_theme_check( 'bosa-it-services' ) || keon_toolset_theme_check( 'bosa-university' ) || keon_toolset_theme_check( 'bosa-creative-agency' ) || keon_toolset_theme_check( 'bosa-garden-care' ) || keon_toolset_theme_check( 'bosa-construction-company' ) || keon_toolset_theme_check( 'bosa-travel-agency' ) || keon_toolset_theme_check( 'bosa-business-agency' ) || keon_toolset_theme_check( 'bosa-online-marketing' ) || keon_toolset_theme_check( 'bosa-law-firm' ) || keon_toolset_theme_check( 'bosa-veterinary-care' ) || keon_toolset_theme_check( 'bosa-ai-robotics-sector' ) || keon_toolset_theme_check( 'bosa-charity-firm' ) || keon_toolset_theme_check( 'bosa-restaurant-inn' ) || keon_toolset_theme_check( 'bosa-business-solutions' ) || keon_toolset_theme_check( 'bosa-portfolio-bio' ) || keon_toolset_theme_check( 'bosa-event-organizer' ) || keon_toolset_theme_check( 'bosa-ev-rental-car' ) ) ){
+if( ( keon_toolset_theme_check( 'shoppable' ) && !keon_toolset_theme_check( 'hello-shoppable' ) ) || ( keon_toolset_theme_check( 'bosa-media-marketing' ) || keon_toolset_theme_check( 'bosa-business-firm' ) || keon_toolset_theme_check( 'bosa-photograph' ) || keon_toolset_theme_check( 'bosa-interior-design' ) || keon_toolset_theme_check( 'bosa-cleaning-service' ) || keon_toolset_theme_check( 'bosa-veterinary' ) || keon_toolset_theme_check( 'bosa-yoga' ) || keon_toolset_theme_check( 'bosa-logistics' ) || keon_toolset_theme_check( 'bosa-crypto' ) || keon_toolset_theme_check( 'bosa-clinic' ) || keon_toolset_theme_check( 'bosa-it-services' ) || keon_toolset_theme_check( 'bosa-university' ) || keon_toolset_theme_check( 'bosa-creative-agency' ) || keon_toolset_theme_check( 'bosa-garden-care' ) || keon_toolset_theme_check( 'bosa-construction-company' ) || keon_toolset_theme_check( 'bosa-travel-agency' ) || keon_toolset_theme_check( 'bosa-business-agency' ) || keon_toolset_theme_check( 'bosa-online-marketing' ) || keon_toolset_theme_check( 'bosa-law-firm' ) || keon_toolset_theme_check( 'bosa-veterinary-care' ) || keon_toolset_theme_check( 'bosa-ai-robotics-sector' ) || keon_toolset_theme_check( 'bosa-charity-firm' ) || keon_toolset_theme_check( 'bosa-restaurant-inn' ) || keon_toolset_theme_check( 'bosa-business-solutions' ) || keon_toolset_theme_check( 'bosa-portfolio-bio' ) || keon_toolset_theme_check( 'bosa-event-organizer' ) || keon_toolset_theme_check( 'bosa-ev-rental-car' ) || keon_toolset_theme_check( 'bosa-finance-consult' ) ) ){
     require KEON_TOOLSET_PATH . 'demo/base-install/base-install.php';
     add_action('advanced_import_after_complete_screen', array( $plugin_admin, 'kt_advance_import' ));
     add_action('advanced_import_after_content_screen', array( $plugin_admin, 'kt_advance_import_transient' )); 
