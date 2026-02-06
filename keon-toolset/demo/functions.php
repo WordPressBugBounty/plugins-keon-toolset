@@ -558,6 +558,22 @@ class Keon_Toolset_Hooks {
             case 'bosa-handyman-services':
             case 'bosa-education-zone':
             case 'bosa-insurance-agency':
+            case 'bosa-resort':
+            case 'bosa-business-coach':
+            case 'bosa-medical-care':
+            case 'bosa-preschool':
+            case 'bosa-tech-company':
+            case 'bosa-driving-school':
+            case 'shoppable-couture':
+            case 'bosa-advertising-agency':
+            case 'bosa-cyber-security':
+            case 'bosa-startup-business':
+            case 'bosa-job-portal':
+            case 'bosa-finance-company':
+            case 'bosa-courier-service':
+            case 'bosa-bakery':
+            case 'bosa-health-coach':
+            case 'bosa-freelancer':
                 /*attachments IDS*/
                 $attachment_ids = array(
                     'banner_image',

@@ -2,9 +2,9 @@
 Contributors: keonthemes, kanchha-kaji-prajapati
 Tags: demo data, one click demo import, demo data importer
 Requires at least: 4.6
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 4.6
-Stable tag: 2.2.9
+Stable tag: 2.4.5
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -39,6 +39,55 @@ https://pxhere.com/en/license [CCO License]
 Keon Toolset
 
 == Changelog ==
+
+= 2.4.5 =
+* Theme compatibility updated
+
+= 2.4.4 =
+* Theme compatibility updated
+
+= 2.4.3 =
+* Theme compatibility updated
+
+= 2.4.2 =
+* Theme compatibility updated
+
+= 2.4.1 =
+* Theme compatibility updated
+
+= 2.4.0 =
+* Theme compatibility updated
+* Wordpress compatibility updated
+
+= 2.3.9 =
+* Theme compatibility updated
+
+= 2.3.8 =
+* Theme compatibility updated
+
+= 2.3.7 =
+* Theme compatibility updated
+
+= 2.3.6 =
+* Theme compatibility updated
+
+= 2.3.5 =
+* Theme compatibility updated
+
+= 2.3.4 =
+* Theme compatibility updated
+
+= 2.3.3 =
+* Theme compatibility updated
+
+= 2.3.2 =
+* Theme compatibility updated
+
+= 2.3.1 =
+* Theme compatibility updated
+
+= 2.3.0 =
+* Theme compatibility updated
 
 = 2.2.9 =
 * Theme compatibility updated
