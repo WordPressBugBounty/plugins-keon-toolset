@@ -32,6 +32,7 @@ class Keon_Toolset_Hooks {
         add_filter( 'advanced_export_include_options', array( $this, 'export_include_options' ) );
         add_action( 'advanced_import_before_complete_screen', array( $this, 'update_elementskit_mega_menu_post' ) );
         add_filter( 'advanced_import_update_value_elementskit_options', array( $this, 'update_elementskit_options' ) );
+        add_action( 'advanced_import_after_complete_screen', array( $this, 'elements_cache_disabled') );
     }
 
     /**
@@ -715,6 +716,22 @@ class Keon_Toolset_Hooks {
             'elementskit_options',
         );
         return array_unique (array_merge( $included_options, $my_options));
+    }
+
+    /**
+     * Elementor Element Cache.
+     *
+     */
+    public function elements_cache_disabled(){
+        // Check if Elementor is active
+        if ( ! class_exists( '\Elementor\Plugin' ) ) {
+            return;
+        };
+
+        // Only update if not already disabled — avoids triggering clear_cache() every load
+        if ( 'disable' !== get_option( 'elementor_element_cache_ttl' ) ) {
+            update_option( 'elementor_element_cache_ttl', 'disable' );
+        };
     }
 }
 
