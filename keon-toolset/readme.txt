@@ -4,7 +4,7 @@ Tags: demo data, one click demo import, demo data importer
 Requires at least: 4.6
 Tested up to: 6.9
 Requires PHP: 4.6
-Stable tag: 2.4.6
+Stable tag: 2.4.7
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -39,6 +39,10 @@ https://pxhere.com/en/license [CCO License]
 Keon Toolset
 
 == Changelog ==
+
+= 2.4.7 =
+* Elementor image import issue fixed
+* Style issue fixed
 
 = 2.4.6 =
 * Import style issue fixed

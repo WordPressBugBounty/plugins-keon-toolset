@@ -5,7 +5,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 Plugin Name: Keon Toolset
 Plugin URI:  
 Description: A demo importer plugin that makes importing starter sites effortless for building your website!
-Version:     2.4.6
+Version:     2.4.7
 Author:      Keon Themes
 Author URI:  https://keonthemes.com
 License:     GPLv3 or later
@@ -16,7 +16,7 @@ Text Domain: keon-toolset
 define( 'KEON_TOOLSET_URL', plugin_dir_url( __FILE__ ).'demo/' );
 define( 'KEON_TEMPLATE_URL', plugin_dir_url( __FILE__ ) );
 define( 'KEON_TOOLSET_PATH', plugin_dir_path( __FILE__ ) );
-define( 'KEON_TOOLSET_VERSION', '2.4.6');
+define( 'KEON_TOOLSET_VERSION', '2.4.7');
 
 /**
  * Returns the currently active theme's name.
@@ -47,6 +47,10 @@ require KEON_TOOLSET_PATH . 'demo/functions.php';
 require KEON_TOOLSET_PATH . 'includes/class-template-library-base.php';
 require KEON_TOOLSET_PATH . 'includes/theme-check-functions.php';
 require KEON_TOOLSET_PATH . 'includes/admin-notices.php';
+require_once KEON_TOOLSET_PATH . 'includes/class-elementor-image-import-fixer.php';
+if ( class_exists( 'Keon_Toolset_Elementor_Image_Import_Fixer' ) ) {
+    Keon_Toolset_Elementor_Image_Import_Fixer::init();
+}
 if ( keon_toolset_theme_check( 'bosa' ) && !keon_toolset_theme_check( 'bosa-pro' ) ){
     require KEON_TOOLSET_PATH . 'includes/class-bosa-pro-upgrade-notice.php';
 }

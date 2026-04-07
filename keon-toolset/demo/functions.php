@@ -33,6 +33,9 @@ class Keon_Toolset_Hooks {
         add_action( 'advanced_import_before_complete_screen', array( $this, 'update_elementskit_mega_menu_post' ) );
         add_filter( 'advanced_import_update_value_elementskit_options', array( $this, 'update_elementskit_options' ) );
         add_action( 'advanced_import_after_complete_screen', array( $this, 'elements_cache_disabled') );
+        if( class_exists( 'Advanced_Import' ) ){
+            add_action( 'init', array( $this, 'template_import_remove') );
+        }
     }
 
     /**
@@ -732,6 +735,20 @@ class Keon_Toolset_Hooks {
         if ( 'disable' !== get_option( 'elementor_element_cache_ttl' ) ) {
             update_option( 'elementor_element_cache_ttl', 'disable' );
         };
+    }
+
+    /**
+     * Remove Template Import.
+     *
+     */
+    public function template_import_remove(){
+        // Check if Advance Import Function exist
+        if ( ! function_exists( 'advanced_import_admin_template' ) ) {
+            return;
+        };
+
+        // remove template import hook from admin menu
+        remove_action('admin_menu', [ advanced_import_admin_template(), 'add_theme_menu' ] );
     }
 }
 
