@@ -5,7 +5,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 Plugin Name: Keon Toolset
 Plugin URI:  
 Description: A demo importer plugin that makes importing starter sites effortless for building your website!
-Version:     2.4.7
+Version:     2.4.8
 Author:      Keon Themes
 Author URI:  https://keonthemes.com
 License:     GPLv3 or later
@@ -16,7 +16,7 @@ Text Domain: keon-toolset
 define( 'KEON_TOOLSET_URL', plugin_dir_url( __FILE__ ).'demo/' );
 define( 'KEON_TEMPLATE_URL', plugin_dir_url( __FILE__ ) );
 define( 'KEON_TOOLSET_PATH', plugin_dir_path( __FILE__ ) );
-define( 'KEON_TOOLSET_VERSION', '2.4.7');
+define( 'KEON_TOOLSET_VERSION', '2.4.8');
 
 /**
  * Returns the currently active theme's name.
@@ -51,6 +51,199 @@ require_once KEON_TOOLSET_PATH . 'includes/class-elementor-image-import-fixer.ph
 if ( class_exists( 'Keon_Toolset_Elementor_Image_Import_Fixer' ) ) {
     Keon_Toolset_Elementor_Image_Import_Fixer::init();
 }
+
+/**
+ * Prints Kirki version compatibility notice markup.
+ *
+ * @since    2.4.8
+ */
+function keon_toolset_kirki_notice_is_dismissed() {
+    return (bool) get_option( 'keon_toolset_kirki_notice_dismissed', false );
+}
+
+/**
+ * Builds dismiss URL for the Kirki notice.
+ *
+ * @since    2.4.8
+ */
+function keon_toolset_kirki_notice_dismiss_url() {
+    return wp_nonce_url(
+        admin_url( 'admin-post.php?action=keon_toolset_dismiss_kirki_notice' ),
+        'keon_toolset_dismiss_kirki_notice'
+    );
+}
+
+/**
+ * Handles dismiss request for the Kirki compatibility notice.
+ *
+ * @since    2.4.8
+ */
+function keon_toolset_handle_kirki_notice_dismiss() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( esc_html__( 'You are not allowed to perform this action.', 'keon-toolset' ) );
+    }
+
+    check_admin_referer( 'keon_toolset_dismiss_kirki_notice' );
+    update_option( 'keon_toolset_kirki_notice_dismissed', 1 );
+
+    $redirect_url = wp_get_referer();
+    if ( empty( $redirect_url ) ) {
+        $redirect_url = admin_url();
+    }
+
+    wp_safe_redirect( $redirect_url );
+    exit;
+}
+add_action( 'admin_post_keon_toolset_dismiss_kirki_notice', 'keon_toolset_handle_kirki_notice_dismiss' );
+
+/**
+ * Resets dismissed state for the Kirki compatibility notice.
+ *
+ * @since    2.4.8
+ */
+function keon_toolset_handle_kirki_notice_reset() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( esc_html__( 'You are not allowed to perform this action.', 'keon-toolset' ) );
+    }
+
+    check_admin_referer( 'keon_toolset_reset_kirki_notice' );
+    delete_option( 'keon_toolset_kirki_notice_dismissed' );
+
+    $redirect_url = wp_get_referer();
+    if ( empty( $redirect_url ) ) {
+        $redirect_url = admin_url();
+    }
+
+    wp_safe_redirect( $redirect_url );
+    exit;
+}
+add_action( 'admin_post_keon_toolset_reset_kirki_notice', 'keon_toolset_handle_kirki_notice_reset' );
+
+/**
+ * Prints Kirki version compatibility notice markup.
+ *
+ * @since    2.4.8
+ */
+function keon_toolset_kirki_version_notice_markup() {
+    ?>
+    
+        <h2><?php esc_html_e( 'Theme Compatibility Notice:', 'keon-toolset' ); ?></h2>
+        <p>
+        <?php esc_html_e( 'We strongly recommend using Kirki 5.1.1 as it is stable and fully compatible with our theme. Please temporarily avoid updating beyond 5.1.1 (including latest version 5.2.3) for now due to known issues, and we will update compatibility once resolved.', 'keon-toolset' ); ?><br/>
+        <?php esc_html_e( 'Download Kirki version 5.1.1 here: ', 'keon-toolset' ); ?>
+        <a href="<?php echo esc_url( 'https://downloads.wordpress.org/plugin/kirki.5.1.1.zip' ); ?>" target="_blank" rel="noopener noreferrer">
+            <?php esc_html_e( 'https://downloads.wordpress.org/plugin/kirki.5.1.1.zip', 'keon-toolset' ); ?>
+        </a>
+    </p>
+    <p>
+        <a class="button button-secondary" href="<?php echo esc_url( keon_toolset_kirki_notice_dismiss_url() ); ?>">
+            <?php esc_html_e( 'Dismiss', 'keon-toolset' ); ?>
+        </a>
+    </p>
+    <?php
+}
+
+/**
+ * Shows Kirki compatibility notice on wp-admin dashboard pages.
+ *
+ * @since    2.4.8
+ */
+function keon_toolset_kirki_admin_notice() {
+    if ( keon_toolset_kirki_notice_is_dismissed() ) {
+        return;
+    }
+
+    ?>
+    <div class="notice notice-warning is-dismissible">
+        <?php keon_toolset_kirki_version_notice_markup(); ?>
+    </div>
+    <?php
+}
+add_action( 'admin_notices', 'keon_toolset_kirki_admin_notice' );
+
+/**
+ * Injects Kirki compatibility notice in Customizer controls panel.
+ *
+ * @since    2.4.8
+ */
+function keon_toolset_kirki_customizer_notice_script() {
+    if ( keon_toolset_kirki_notice_is_dismissed() ) {
+        return;
+    }
+
+    $dismiss_url  = esc_url( keon_toolset_kirki_notice_dismiss_url() );
+    $download_url = esc_url( 'https://downloads.wordpress.org/plugin/kirki.5.1.1.zip' );
+    $title_text   = esc_html__( 'Theme Compatibility Notice:', 'keon-toolset' );
+    $message_text = esc_html__( 'We strongly recommend using Kirki 5.1.1 as it is stable and fully compatible with our theme. Please temporarily avoid updating beyond 5.1.1 (including latest version 5.2.3) for now due to known issues, and we will update compatibility once resolved.', 'keon-toolset' );
+    $link_label   = esc_html__( 'Download Kirki version 5.1.1 here:', 'keon-toolset' );
+    $dismiss_text = esc_html__( 'Dismiss', 'keon-toolset' );
+    $close_text   = esc_html__( 'Close this notice.', 'keon-toolset' );
+
+    ?>
+    <script>
+        ( function() {
+            function insertKirkiNotice() {
+                if ( document.getElementById( 'keon-toolset-customizer-kirki-notice' ) ) {
+                    return;
+                }
+
+                var container = document.querySelector( '#customize-theme-controls .wp-full-overlay-sidebar-content' );
+                if ( ! container ) {
+                    container = document.querySelector( '#customize-theme-controls' );
+                }
+                if ( ! container ) {
+                    return;
+                }
+
+                var notice = document.createElement( 'div' );
+                notice.id = 'keon-toolset-customizer-kirki-notice';
+                notice.className = 'notice notice-warning is-dismissible';
+                notice.style.margin = '12px';
+
+                var dismissButton = document.createElement( 'button' );
+                dismissButton.type = 'button';
+                dismissButton.className = 'notice-dismiss';
+                dismissButton.innerHTML = '<span class="screen-reader-text"><?php echo esc_js( $close_text ); ?></span>';
+                dismissButton.addEventListener( 'click', function( event ) {
+                    event.preventDefault();
+                    notice.style.display = 'none';
+                } );
+
+                notice.innerHTML = '<p><strong><?php echo esc_js( $title_text ); ?></strong> <?php echo esc_js( $message_text ); ?><br><?php echo esc_js( $link_label ); ?> <a href="<?php echo esc_url( $download_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_js( $download_url ); ?></a></p><p><a class="button button-secondary" href="<?php echo esc_url( $dismiss_url ); ?>"><?php echo esc_js( $dismiss_text ); ?></a></p>';
+                notice.appendChild( dismissButton );
+
+                var activeThemeSection = document.getElementById( 'customize-section-themes' );
+                if ( activeThemeSection && activeThemeSection.parentNode ) {
+                    if ( activeThemeSection.nextSibling ) {
+                        activeThemeSection.parentNode.insertBefore( notice, activeThemeSection.nextSibling );
+                    } else {
+                        activeThemeSection.parentNode.appendChild( notice );
+                    }
+                } else {
+                    var upsellSection = document.getElementById( 'accordion-section-theme_upsell' );
+                    if ( upsellSection && upsellSection.parentNode ) {
+                        upsellSection.parentNode.insertBefore( notice, upsellSection );
+                    } else {
+                        container.insertBefore( notice, container.firstChild );
+                    }
+                }
+            }
+
+            if ( document.readyState === 'loading' ) {
+                document.addEventListener( 'DOMContentLoaded', insertKirkiNotice );
+            } else {
+                insertKirkiNotice();
+            }
+
+            // Customizer panes can render asynchronously.
+            setTimeout( insertKirkiNotice, 400 );
+            setTimeout( insertKirkiNotice, 1200 );
+        }() );
+    </script>
+    <?php
+}
+add_action( 'customize_controls_print_footer_scripts', 'keon_toolset_kirki_customizer_notice_script', 1 );
+
 if ( keon_toolset_theme_check( 'bosa' ) && !keon_toolset_theme_check( 'bosa-pro' ) ){
     require KEON_TOOLSET_PATH . 'includes/class-bosa-pro-upgrade-notice.php';
 }
