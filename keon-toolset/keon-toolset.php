@@ -5,7 +5,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 Plugin Name: Keon Toolset
 Plugin URI:  
 Description: A demo importer plugin that makes importing starter sites effortless for building your website!
-Version:     2.4.8
+Version:     2.4.9
 Author:      Keon Themes
 Author URI:  https://keonthemes.com
 License:     GPLv3 or later
@@ -16,7 +16,10 @@ Text Domain: keon-toolset
 define( 'KEON_TOOLSET_URL', plugin_dir_url( __FILE__ ).'demo/' );
 define( 'KEON_TEMPLATE_URL', plugin_dir_url( __FILE__ ) );
 define( 'KEON_TOOLSET_PATH', plugin_dir_path( __FILE__ ) );
-define( 'KEON_TOOLSET_VERSION', '2.4.8');
+define( 'KEON_TOOLSET_VERSION', '2.4.9');
+define( 'KEON_TOOLSET_KIRKI_VERSION', '5.1.1' );
+define( 'KEON_TOOLSET_KIRKI_PACKAGE_URL', 'https://downloads.wordpress.org/plugin/kirki.5.1.1.zip' );
+define( 'KEON_TOOLSET_KIRKI_PLUGIN_FILE', 'kirki/kirki.php' );
 
 /**
  * Returns the currently active theme's name.
@@ -74,6 +77,18 @@ function keon_toolset_kirki_notice_dismiss_url() {
 }
 
 /**
+ * URL to install or replace Kirki with the bundled compatible version (via admin-post).
+ *
+ * @since 2.4.8
+ */
+function keon_toolset_kirki_install_action_url() {
+    return wp_nonce_url(
+        admin_url( 'admin-post.php?action=keon_toolset_install_kirki' ),
+        'keon_toolset_install_kirki'
+    );
+}
+
+/**
  * Handles dismiss request for the Kirki compatibility notice.
  *
  * @since    2.4.8
@@ -95,6 +110,135 @@ function keon_toolset_handle_kirki_notice_dismiss() {
     exit;
 }
 add_action( 'admin_post_keon_toolset_dismiss_kirki_notice', 'keon_toolset_handle_kirki_notice_dismiss' );
+
+/**
+ * Installs Kirki 5.1.1 from the WordPress.org package URL and activates it.
+ * Replaces any existing Kirki installation in wp-content/plugins/kirki.
+ *
+ * @since 2.4.8
+ */
+function keon_toolset_handle_kirki_install() {
+    if ( ! current_user_can( 'install_plugins' ) || ! current_user_can( 'activate_plugins' ) ) {
+        wp_die( esc_html__( 'You are not allowed to perform this action.', 'keon-toolset' ) );
+    }
+
+    check_admin_referer( 'keon_toolset_install_kirki' );
+
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    require_once ABSPATH . 'wp-admin/includes/plugin.php';
+    require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+
+    $skin     = new Automatic_Upgrader_Skin();
+    $upgrader = new Plugin_Upgrader( $skin );
+    $result   = $upgrader->install(
+        KEON_TOOLSET_KIRKI_PACKAGE_URL,
+        array(
+            'overwrite_package' => true,
+        )
+    );
+
+    $redirect = wp_get_referer();
+    if ( empty( $redirect ) ) {
+        $redirect = admin_url( 'plugins.php' );
+    }
+
+    if ( is_wp_error( $result ) ) {
+        set_transient(
+            'keon_toolset_kirki_install_notice',
+            array(
+                'success' => false,
+                'text'    => sprintf(
+                    /* translators: 1: Kirki version, 2: Error message. */
+                    __( 'Could not install Kirki %1$s: %2$s', 'keon-toolset' ),
+                    KEON_TOOLSET_KIRKI_VERSION,
+                    $result->get_error_message()
+                ),
+            ),
+            60
+        );
+        wp_safe_redirect( $redirect );
+        exit;
+    }
+
+    if ( false === $result ) {
+        set_transient(
+            'keon_toolset_kirki_install_notice',
+            array(
+                'success' => false,
+                'text'    => sprintf(
+                    /* translators: %s: Kirki version number. */
+                    __( 'Kirki %s installation failed. Please try again or install the plugin manually under Plugins → Add New.', 'keon-toolset' ),
+                    KEON_TOOLSET_KIRKI_VERSION
+                ),
+            ),
+            60
+        );
+        wp_safe_redirect( $redirect );
+        exit;
+    }
+
+    $activation = activate_plugin( KEON_TOOLSET_KIRKI_PLUGIN_FILE, '', false, true );
+
+    if ( is_wp_error( $activation ) ) {
+        set_transient(
+            'keon_toolset_kirki_install_notice',
+            array(
+                'success' => false,
+                'text'    => sprintf(
+                    /* translators: 1: Kirki version, 2: Error message. */
+                    __( 'Kirki %1$s was installed but could not be activated automatically: %2$s Please activate it on the Plugins screen.', 'keon-toolset' ),
+                    KEON_TOOLSET_KIRKI_VERSION,
+                    $activation->get_error_message()
+                ),
+            ),
+            60
+        );
+        wp_safe_redirect( $redirect );
+        exit;
+    }
+
+    set_transient(
+        'keon_toolset_kirki_install_notice',
+        array(
+            'success' => true,
+            'text'    => sprintf(
+                /* translators: %s: Kirki version number. */
+                __( 'Kirki %s has been installed and activated successfully.', 'keon-toolset' ),
+                KEON_TOOLSET_KIRKI_VERSION
+            ),
+        ),
+        60
+    );
+    wp_safe_redirect( $redirect );
+    exit;
+}
+add_action( 'admin_post_keon_toolset_install_kirki', 'keon_toolset_handle_kirki_install' );
+
+/**
+ * One-time admin notice after attempting to install Kirki from the compatibility notice.
+ *
+ * @since 2.4.8
+ */
+function keon_toolset_kirki_install_result_notice() {
+    if ( ! current_user_can( 'activate_plugins' ) ) {
+        return;
+    }
+
+    $payload = get_transient( 'keon_toolset_kirki_install_notice' );
+    if ( false === $payload || ! is_array( $payload ) || empty( $payload['text'] ) ) {
+        return;
+    }
+
+    delete_transient( 'keon_toolset_kirki_install_notice' );
+
+    $class = ! empty( $payload['success'] ) ? 'notice-success' : 'notice-error';
+    printf(
+        '<div class="notice %1$s is-dismissible"><p>%2$s</p></div>',
+        esc_attr( $class ),
+        esc_html( $payload['text'] )
+    );
+}
+add_action( 'admin_notices', 'keon_toolset_kirki_install_result_notice', 5 );
 
 /**
  * Resets dismissed state for the Kirki compatibility notice.
@@ -125,15 +269,20 @@ add_action( 'admin_post_keon_toolset_reset_kirki_notice', 'keon_toolset_handle_k
  * @since    2.4.8
  */
 function keon_toolset_kirki_version_notice_markup() {
+    $can_install = current_user_can( 'install_plugins' ) && current_user_can( 'activate_plugins' );
     ?>
     
         <h2><?php esc_html_e( 'Theme Compatibility Notice:', 'keon-toolset' ); ?></h2>
         <p>
         <?php esc_html_e( 'We strongly recommend using Kirki 5.1.1 as it is stable and fully compatible with our theme. Please temporarily avoid updating beyond 5.1.1 (including latest version 5.2.3) for now due to known issues, and we will update compatibility once resolved.', 'keon-toolset' ); ?><br/>
-        <?php esc_html_e( 'Download Kirki version 5.1.1 here: ', 'keon-toolset' ); ?>
-        <a href="<?php echo esc_url( 'https://downloads.wordpress.org/plugin/kirki.5.1.1.zip' ); ?>" target="_blank" rel="noopener noreferrer">
-            <?php esc_html_e( 'https://downloads.wordpress.org/plugin/kirki.5.1.1.zip', 'keon-toolset' ); ?>
-        </a>
+        <?php if ( $can_install ) : ?>
+            <?php esc_html_e( 'Install and activate Kirki version 5.1.1:', 'keon-toolset' ); ?>
+            <a href="<?php echo esc_url( keon_toolset_kirki_install_action_url() ); ?>">
+                <?php esc_html_e( 'Install Kirki 5.1.1', 'keon-toolset' ); ?>
+            </a>
+        <?php else : ?>
+            <?php esc_html_e( 'Please ask a site administrator to install Kirki version 5.1.1.', 'keon-toolset' ); ?>
+        <?php endif; ?>
     </p>
     <p>
         <a class="button button-secondary" href="<?php echo esc_url( keon_toolset_kirki_notice_dismiss_url() ); ?>">
@@ -172,10 +321,13 @@ function keon_toolset_kirki_customizer_notice_script() {
     }
 
     $dismiss_url  = esc_url( keon_toolset_kirki_notice_dismiss_url() );
-    $download_url = esc_url( 'https://downloads.wordpress.org/plugin/kirki.5.1.1.zip' );
+    $can_install  = current_user_can( 'install_plugins' ) && current_user_can( 'activate_plugins' );
+    $install_url  = $can_install ? esc_url( keon_toolset_kirki_install_action_url() ) : '';
     $title_text   = esc_html__( 'Theme Compatibility Notice:', 'keon-toolset' );
     $message_text = esc_html__( 'We strongly recommend using Kirki 5.1.1 as it is stable and fully compatible with our theme. Please temporarily avoid updating beyond 5.1.1 (including latest version 5.2.3) for now due to known issues, and we will update compatibility once resolved.', 'keon-toolset' );
-    $link_label   = esc_html__( 'Download Kirki version 5.1.1 here:', 'keon-toolset' );
+    $link_label   = esc_html__( 'Install and activate Kirki version 5.1.1:', 'keon-toolset' );
+    $link_text    = esc_html__( 'Install Kirki 5.1.1', 'keon-toolset' );
+    $no_cap_text  = esc_html__( 'Please ask a site administrator to install Kirki version 5.1.1.', 'keon-toolset' );
     $dismiss_text = esc_html__( 'Dismiss', 'keon-toolset' );
     $close_text   = esc_html__( 'Close this notice.', 'keon-toolset' );
 
@@ -209,7 +361,7 @@ function keon_toolset_kirki_customizer_notice_script() {
                     notice.style.display = 'none';
                 } );
 
-                notice.innerHTML = '<p><strong><?php echo esc_js( $title_text ); ?></strong> <?php echo esc_js( $message_text ); ?><br><?php echo esc_js( $link_label ); ?> <a href="<?php echo esc_url( $download_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_js( $download_url ); ?></a></p><p><a class="button button-secondary" href="<?php echo esc_url( $dismiss_url ); ?>"><?php echo esc_js( $dismiss_text ); ?></a></p>';
+                notice.innerHTML = '<p><strong><?php echo esc_js( $title_text ); ?></strong> <?php echo esc_js( $message_text ); ?><br><?php if ( $can_install ) : ?><?php echo esc_js( $link_label ); ?> <a href="<?php echo esc_url( $install_url ); ?>"><?php echo esc_js( $link_text ); ?></a><?php else : ?><?php echo esc_js( $no_cap_text ); ?><?php endif; ?></p><p><a class="button button-secondary" href="<?php echo esc_url( $dismiss_url ); ?>"><?php echo esc_js( $dismiss_text ); ?></a></p>';
                 notice.appendChild( dismissButton );
 
                 var activeThemeSection = document.getElementById( 'customize-section-themes' );
