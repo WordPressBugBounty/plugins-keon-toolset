@@ -5,7 +5,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 Plugin Name: Keon Toolset
 Plugin URI:  
 Description: A demo importer plugin that makes importing starter sites effortless for building your website!
-Version:     2.5.0
+Version:     2.5.1
 Author:      Keon Themes
 Author URI:  https://keonthemes.com
 License:     GPLv3 or later
@@ -16,10 +16,10 @@ Text Domain: keon-toolset
 define( 'KEON_TOOLSET_URL', plugin_dir_url( __FILE__ ).'demo/' );
 define( 'KEON_TEMPLATE_URL', plugin_dir_url( __FILE__ ) );
 define( 'KEON_TOOLSET_PATH', plugin_dir_path( __FILE__ ) );
-define( 'KEON_TOOLSET_VERSION', '2.5.0');
-define( 'KEON_TOOLSET_KIRKI_VERSION', '5.1.1' );
-define( 'KEON_TOOLSET_KIRKI_PACKAGE_URL', 'https://downloads.wordpress.org/plugin/kirki.5.1.1.zip' );
-define( 'KEON_TOOLSET_KIRKI_PLUGIN_FILE', 'kirki/kirki.php' );
+define( 'KEON_TOOLSET_VERSION', '2.5.1');
+// define( 'KEON_TOOLSET_KIRKI_VERSION', '5.1.1' );
+// define( 'KEON_TOOLSET_KIRKI_PACKAGE_URL', 'https://downloads.wordpress.org/plugin/kirki.5.1.1.zip' );
+// define( 'KEON_TOOLSET_KIRKI_PLUGIN_FILE', 'kirki/kirki.php' );
 
 /**
  * Returns the currently active theme's name.
@@ -109,7 +109,7 @@ function keon_toolset_handle_kirki_notice_dismiss() {
     wp_safe_redirect( $redirect_url );
     exit;
 }
-add_action( 'admin_post_keon_toolset_dismiss_kirki_notice', 'keon_toolset_handle_kirki_notice_dismiss' );
+// add_action( 'admin_post_keon_toolset_dismiss_kirki_notice', 'keon_toolset_handle_kirki_notice_dismiss' );
 
 /**
  * Installs Kirki 5.1.1 from the WordPress.org package URL and activates it.
@@ -212,7 +212,7 @@ function keon_toolset_handle_kirki_install() {
     wp_safe_redirect( $redirect );
     exit;
 }
-add_action( 'admin_post_keon_toolset_install_kirki', 'keon_toolset_handle_kirki_install' );
+// add_action( 'admin_post_keon_toolset_install_kirki', 'keon_toolset_handle_kirki_install' );
 
 /**
  * One-time admin notice after attempting to install Kirki from the compatibility notice.
@@ -238,7 +238,7 @@ function keon_toolset_kirki_install_result_notice() {
         esc_html( $payload['text'] )
     );
 }
-add_action( 'admin_notices', 'keon_toolset_kirki_install_result_notice', 5 );
+// add_action( 'admin_notices', 'keon_toolset_kirki_install_result_notice', 5 );
 
 /**
  * Resets dismissed state for the Kirki compatibility notice.
@@ -261,7 +261,7 @@ function keon_toolset_handle_kirki_notice_reset() {
     wp_safe_redirect( $redirect_url );
     exit;
 }
-add_action( 'admin_post_keon_toolset_reset_kirki_notice', 'keon_toolset_handle_kirki_notice_reset' );
+// add_action( 'admin_post_keon_toolset_reset_kirki_notice', 'keon_toolset_handle_kirki_notice_reset' );
 
 /**
  * Prints Kirki version compatibility notice markup.
@@ -308,7 +308,7 @@ function keon_toolset_kirki_admin_notice() {
     </div>
     <?php
 }
-add_action( 'admin_notices', 'keon_toolset_kirki_admin_notice' );
+// add_action( 'admin_notices', 'keon_toolset_kirki_admin_notice' );
 
 /**
  * Injects Kirki compatibility notice in Customizer controls panel.
@@ -394,7 +394,7 @@ function keon_toolset_kirki_customizer_notice_script() {
     </script>
     <?php
 }
-add_action( 'customize_controls_print_footer_scripts', 'keon_toolset_kirki_customizer_notice_script', 1 );
+// add_action( 'customize_controls_print_footer_scripts', 'keon_toolset_kirki_customizer_notice_script', 1 );
 
 if ( keon_toolset_theme_check( 'bosa' ) && !keon_toolset_theme_check( 'bosa-pro' ) ){
     require KEON_TOOLSET_PATH . 'includes/class-bosa-pro-upgrade-notice.php';
