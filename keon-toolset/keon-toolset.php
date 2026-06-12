@@ -5,7 +5,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 Plugin Name: Keon Toolset
 Plugin URI:  
 Description: A demo importer plugin that makes importing starter sites effortless for building your website!
-Version:     2.5.1
+Version:     2.5.2
 Author:      Keon Themes
 Author URI:  https://keonthemes.com
 License:     GPLv3 or later
@@ -16,7 +16,7 @@ Text Domain: keon-toolset
 define( 'KEON_TOOLSET_URL', plugin_dir_url( __FILE__ ).'demo/' );
 define( 'KEON_TEMPLATE_URL', plugin_dir_url( __FILE__ ) );
 define( 'KEON_TOOLSET_PATH', plugin_dir_path( __FILE__ ) );
-define( 'KEON_TOOLSET_VERSION', '2.5.1');
+define( 'KEON_TOOLSET_VERSION', '2.5.2');
 // define( 'KEON_TOOLSET_KIRKI_VERSION', '5.1.1' );
 // define( 'KEON_TOOLSET_KIRKI_PACKAGE_URL', 'https://downloads.wordpress.org/plugin/kirki.5.1.1.zip' );
 // define( 'KEON_TOOLSET_KIRKI_PLUGIN_FILE', 'kirki/kirki.php' );
@@ -395,6 +395,93 @@ function keon_toolset_kirki_customizer_notice_script() {
     <?php
 }
 // add_action( 'customize_controls_print_footer_scripts', 'keon_toolset_kirki_customizer_notice_script', 1 );
+
+function keon_toolset_remove_prime_slider_admin_hooks() {
+    global $wp_filter;
+
+    if ( ! isset( $wp_filter['admin_init'] ) ) {
+        return;
+    }
+
+    foreach ( $wp_filter['admin_init']->callbacks as $priority => $callbacks ) {
+        foreach ( $callbacks as $key => $callback ) {
+            if (
+                is_array( $callback['function'] ) &&
+                is_object( $callback['function'][0] ) &&
+                $callback['function'][0] instanceof \PrimeSlider\Admin &&
+                $callback['function'][1] === 'admin_biggopti_script'
+            ) {
+                unset( $wp_filter['admin_init']->callbacks[$priority][$key] );
+            }
+        }
+    }
+}
+add_action( 'init', function() {
+    if ( class_exists( '\PrimeSlider\Prime_Slider_Loader' ) ) {
+        add_action( 'admin_init', 'keon_toolset_remove_prime_slider_admin_hooks', 0 );
+    }
+}, 99 );
+
+function keon_toolset_remove_elementskit_admin_notices() {
+    global $wp_filter;
+
+    if ( ! isset( $wp_filter['admin_notices'] ) ) {
+        return;
+    }
+
+    foreach ( $wp_filter['admin_notices']->callbacks as $priority => $callbacks ) {
+        foreach ( $callbacks as $key => $callback ) {
+            if (
+                is_array( $callback['function'] ) &&
+                is_object( $callback['function'][0] ) &&
+                $callback['function'][0] instanceof \Oxaim\Libs\Notice &&
+                $callback['function'][1] === 'get_notice'
+            ) {
+                try {
+                    $obj = $callback['function'][0];
+                    $ref = new \ReflectionProperty( $obj, 'notice_id' );
+                    $notice_id = $ref->getValue( $obj );
+
+                    if ( strpos( $notice_id, 'wpmet-jhanda' ) === 0 ) {
+                        unset( $wp_filter['admin_notices']->callbacks[$priority][$key] );
+                    }
+                } catch ( \ReflectionException $e ) {
+                    // property not found, skip
+                }
+            }
+        }
+    }
+}
+if ( class_exists( 'ElementsKit_Lite' ) ) {
+    add_action( 'admin_notices', 'keon_toolset_remove_elementskit_admin_notices', 0 );
+}
+
+function keon_toolset_remove_elementor_admin_hooks() {
+    global $wp_filter;
+
+    if ( ! class_exists( '\Elementor\Modules\Promotions\Conversion_Banner' ) ) {
+    return;
+    }
+    global $wp_filter;
+    if ( empty( $wp_filter['in_admin_header'] ) ) {
+        return;
+    }
+    foreach ( $wp_filter['in_admin_header']->callbacks as $priority => $callbacks ) {
+        foreach ( $callbacks as $key => $callback ) {
+            if (
+                isset( $callback['function'] )
+                && is_array( $callback['function'] )
+                && $callback['function'][0] instanceof \Elementor\Modules\Promotions\Conversion_Banner
+                && $callback['function'][1] === 'render_banner_container'
+            ) {
+                unset( $wp_filter['in_admin_header']->callbacks[ $priority ][ $key ] );
+            }
+        }
+    }
+}
+if ( class_exists( '\Elementor\Plugin' ) ) {
+   add_action( 'current_screen', 'keon_toolset_remove_elementor_admin_hooks', 99 );
+}
 
 if ( keon_toolset_theme_check( 'bosa' ) && !keon_toolset_theme_check( 'bosa-pro' ) ){
     require KEON_TOOLSET_PATH . 'includes/class-bosa-pro-upgrade-notice.php';
