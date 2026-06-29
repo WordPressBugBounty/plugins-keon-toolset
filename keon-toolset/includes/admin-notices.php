@@ -39,31 +39,6 @@ function gutener_upsell_admin_notice(){
 }
 
 /**
- * Adds store admin notice.
- * 
- * @since    1.3.7
- */
-function keon_store_admin_notice(){
-    if( !get_user_meta( get_current_user_id(), 'store_notice_dismissed' ) ){
-        $store_img_url = KEON_TEMPLATE_URL . 'assets/img/bosa-store.png';
-        ?>        
-        <div class="keon-notice">
-            <div class="getting-img">
-            <img id="" src="<?php echo esc_url( $store_img_url ); ?>" />
-            </div>
-            <div class="getting-content">
-                <h2><?php esc_html_e('New Awesome FREE WooCommerce Theme - Bosa Store', 'keon-toolset');?></h2>
-                <p class="text"><a href="<?php echo esc_url( 'https://bosathemes.com/bosa-store' ); ?>" target="_blank"><?php esc_html_e('Bosa Store', 'keon-toolset');?></a><?php esc_html_e(' - new free WooCommerce theme from BosaThemes. Check out theme ', 'keon-toolset');?><a href="<?php echo esc_url( 'https://bosathemes.com/bosa-store' ); ?>" target="_blank"><?php esc_html_e('Demo', 'keon-toolset');?></a><?php esc_html_e(' that can be imported for FREE with simple click.', 'keon-toolset');?></p>
-                <a href="<?php echo esc_url( 'https://demo.bosathemes.com/bosa/store' ); ?>" class="button button-primary"><?php esc_html_e('View Demo', 'keon-toolset');?></a>
-                <a href="<?php echo esc_url( 'https://bosathemes.com/bosa-store' ); ?>" class="button button-primary"><?php esc_html_e('Theme Details', 'keon-toolset');?></a>
-            </div>
-            <a href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'store-notice-dismissed', 'dismiss_store_notice' ), 'store_notice_state', 'store_notice_nonce' ) ); ?>" class="admin-notice-dismiss"><?php esc_html_e('Dismiss', 'keon-toolset');?><button type="button" class="notice-dismiss"></button></a>
-        </div>
-        <?php 
-    }
-}
-
-/**
  * Registers admin notice for current user.
  * 
  * @since    1.3.7

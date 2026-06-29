@@ -14,11 +14,6 @@ if( keon_toolset_theme_check( 'gutener' ) && !keon_toolset_theme_check( 'gutener
     add_action( 'admin_notices', 'gutener_upsell_admin_notice' );
 }
 
-if( !keon_toolset_theme_check( 'bosa' ) && !keon_toolset_theme_check( 'gutener' ) ){
-    // Add bosa store admin notice.
-    add_action( 'admin_notices', 'keon_store_admin_notice' );
-}
-
 /**
  * Check active theme textdomain against passed string.
  *
