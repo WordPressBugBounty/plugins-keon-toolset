@@ -581,6 +581,7 @@ class Keon_Toolset_Hooks {
             case 'bosa-political-party':
             case 'bosa-tattoo-studio':
             case 'bosa-saas':
+            case 'bosa-spa-wellness':
                 /*attachments IDS*/
                 $attachment_ids = array(
                     'banner_image',
