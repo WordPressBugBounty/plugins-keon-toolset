@@ -2,9 +2,9 @@
 Contributors: keonthemes, kanchha-kaji-prajapati
 Tags: demo data, one click demo import, demo data importer
 Requires at least: 4.6
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 4.6
-Stable tag: 2.5.5
+Stable tag: 2.5.6
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -40,6 +40,10 @@ Keon Toolset
 
 == Changelog ==
 
+= 2.5.6 =
+* Theme compatibility updated.
+* WordPress 7.1 compatibility update.
+
 = 2.5.5 =
 * Theme compatibility updated.
 
@@ -54,7 +58,7 @@ Keon Toolset
 * Style update.
 
 = 2.5.1 =
-* Wordpress 7.0 compatibility update.
+* WordPress 7.0 compatibility update.
 * Kirki compatibility notice removed.
 
 = 2.5.0 =
